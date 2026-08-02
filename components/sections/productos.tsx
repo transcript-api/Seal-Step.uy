@@ -7,27 +7,27 @@ import { Reveal } from '@/components/reveal'
 const CATEGORIAS = [
   {
     nombre: 'Urbanos',
-    descripcion: 'Diseños streetwear para usar todos los días.',
+    descripcion: 'Clásicos con suela gum y diseño gris para el día a día.',
     imagen: '/images/product-urbanos.png',
-    alt: 'Champión urbano negro de Seal Step',
+    alt: 'Champión urbano gris con franjas blancas y suela gum de Seal Step',
   },
   {
     nombre: 'Deportivos',
-    descripcion: 'Comodidad y amortiguación para entrenar o caminar.',
+    descripcion: 'Amortiguación chunky en plateado y azul para entrenar o caminar.',
     imagen: '/images/product-deportivos.png',
-    alt: 'Champión deportivo blanco con detalles negros',
+    alt: 'Champión deportivo plateado y azul marino con logo lateral',
   },
   {
     nombre: 'Casual',
-    descripcion: 'Modelos versátiles que combinan con todo.',
+    descripcion: 'Modelos versátiles en gris y blanco que combinan con todo.',
     imagen: '/images/product-casual.png',
-    alt: 'Champión casual gris y blanco de lona',
+    alt: 'Champión casual gris y blanco con cordones tipo soga y suela gum',
   },
   {
     nombre: 'Nuevos ingresos',
     descripcion: 'Lo último que entró al stock, en cantidades limitadas.',
     imagen: '/images/product-nuevos.png',
-    alt: 'Par de championes botita blanco y negro',
+    alt: 'Champión blanco y negro estilo panda, nuevo ingreso',
   },
 ]
 

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { WA_LINKS, WHATSAPP_DISPLAY } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 
@@ -15,14 +16,13 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-3 lg:px-8">
         <div>
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-foreground font-heading text-sm font-extrabold text-background">
-              SS
-            </span>
-            <span className="font-heading text-base font-extrabold tracking-[0.18em] uppercase">
-              Seal Step
-            </span>
-          </div>
+          <Image
+            src="/images/seal-step-logo.png"
+            alt="Seal Step"
+            width={170}
+            height={54}
+            className="h-11 w-auto object-contain mix-blend-screen invert"
+          />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
             Championes y calzado urbano para hombre y mujer. Envíos a todo
             Uruguay y ventas por mayor para revendedores. Rivera, Uruguay.

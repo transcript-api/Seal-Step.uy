@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WA_LINKS } from '@/lib/site'
@@ -45,15 +46,17 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-18 lg:px-8">
         <a
           href="#top"
-          className="flex items-center gap-2.5"
+          className="flex items-center"
           aria-label="Seal Step, inicio"
         >
-          <span className="flex size-9 items-center justify-center rounded-lg bg-foreground font-heading text-sm font-extrabold tracking-tight text-background">
-            SS
-          </span>
-          <span className="font-heading text-base font-extrabold tracking-[0.18em] uppercase">
-            Seal Step
-          </span>
+          <Image
+            src="/images/seal-step-logo.png"
+            alt="Seal Step"
+            width={150}
+            height={48}
+            priority
+            className="h-9 w-auto object-contain mix-blend-screen invert lg:h-10"
+          />
         </a>
 
         <nav
