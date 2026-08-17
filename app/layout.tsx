@@ -60,6 +60,8 @@ export const viewport: Viewport = {
   themeColor: '#0A0A0A',
 }
 
+import { ClientProviders } from '@/components/client-providers'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -71,7 +73,9 @@ export default function RootLayout({
       className={`bg-background ${montserrat.variable} ${poppins.variable}`}
     >
       <body className="font-sans antialiased">
-        {children}
+        <ClientProviders>
+          {children}
+        </ClientProviders>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

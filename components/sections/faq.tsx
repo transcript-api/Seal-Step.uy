@@ -1,6 +1,8 @@
-import { Plus } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowRight, Plus } from 'lucide-react'
 import { WA_LINKS } from '@/lib/site'
 import { Reveal } from '@/components/reveal'
+import { AshText } from '@/components/ash-text'
 
 const FAQS = [
   {
@@ -35,26 +37,30 @@ export function Faq() {
       <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:px-8">
         <Reveal>
           <p className="font-heading text-xs font-bold tracking-[0.22em] text-muted-foreground uppercase">
-            Preguntas frecuentes
+            ey, antes de seguir...
           </p>
           <h2
             id="faq-title"
             className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-balance sm:text-5xl"
           >
-            Todo lo que necesitás saber
+            <AshText as="span">¿Querés conocer un poco más de Seal Step?</AshText>
           </h2>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            Si te queda alguna duda,{' '}
-            <a
-              href={WA_LINKS.general}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-foreground underline underline-offset-4 transition-opacity hover:opacity-70"
-            >
-              escribinos por WhatsApp
-            </a>{' '}
-            y te respondemos al instante.
+            No somos una tienda gigante ni queremos parecernos. Somos una tienda de
+            championes que arrancó con algo bastante simple: encontrar buenos pares,
+            a precios razonables, y hacer que comprar sea fácil.
           </p>
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            Con el tiempo fuimos sumando modelos, clientes y una comunidad que nos fue
+            empujando a seguir creciendo.
+          </p>
+          <Link
+            href="/nosotros"
+            className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 font-heading text-xs font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-secondary"
+          >
+            Conocé nuestra historia
+            <ArrowRight className="size-4" />
+          </Link>
         </Reveal>
 
         <div className="grid gap-3">

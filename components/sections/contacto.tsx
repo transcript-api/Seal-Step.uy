@@ -2,6 +2,7 @@ import { Clock, MapPin, Phone } from 'lucide-react'
 import { WA_LINKS, WHATSAPP_DISPLAY } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { Reveal } from '@/components/reveal'
+import { AshText } from '@/components/ash-text'
 
 const DATOS = [
   { icon: Phone, label: 'WhatsApp', value: WHATSAPP_DISPLAY },
@@ -32,7 +33,7 @@ export function Contacto() {
               id="contacto-title"
               className="font-heading text-4xl font-extrabold tracking-tight text-balance sm:text-5xl"
             >
-              Hacé tu pedido ahora
+              <AshText as="span">Hacé tu pedido ahora</AshText>
             </h2>
             <p className="mt-4 leading-relaxed text-muted-foreground">
               Consultá disponibilidad, talles y precios directamente por
@@ -63,17 +64,17 @@ export function Contacto() {
               {WHATSAPP_DISPLAY}
             </p>
 
-            <ul className="mt-10 grid gap-4 border-t border-border pt-8 sm:grid-cols-3">
-              {DATOS.map((d) => (
-                <li key={d.label} className="flex flex-col items-center gap-2">
+            <ul className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 border-t border-border pt-8 text-center">
+              {DATOS.map((d, i) => (
+                <li key={d.label} className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-neutral-900/60 border border-neutral-800 sm:border-neutral-800/60 sm:bg-neutral-900/40 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-lg ${i === 2 ? 'col-span-2 sm:col-span-1' : ''}`}>
                   <d.icon
-                    className="size-5 text-muted-foreground"
+                    className="size-4.5 text-muted-foreground"
                     aria-hidden="true"
                   />
-                  <span className="font-heading text-[11px] font-bold tracking-[0.16em] text-muted-foreground uppercase">
+                  <span className="font-heading text-[10px] font-bold tracking-[0.16em] text-muted-foreground uppercase">
                     {d.label}
                   </span>
-                  <span className="text-sm font-medium">{d.value}</span>
+                  <span className="text-xs sm:text-sm font-medium">{d.value}</span>
                 </li>
               ))}
             </ul>

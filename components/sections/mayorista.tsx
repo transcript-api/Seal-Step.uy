@@ -3,6 +3,9 @@ import { Check, TrendingUp } from 'lucide-react'
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { Reveal } from '@/components/reveal'
+import { AshText } from '@/components/ash-text'
+
+import { ParallaxLayer } from '@/components/parallax-layer'
 
 const BENEFICIOS = [
   'Descuentos por cantidad',
@@ -19,16 +22,16 @@ export function Mayorista() {
       className="relative overflow-hidden border-b border-border py-20 lg:py-28"
       aria-labelledby="mayorista-title"
     >
-      <div className="absolute inset-0" aria-hidden="true">
+      <ParallaxLayer speed={-0.35} className="absolute -inset-16 pointer-events-none" aria-hidden="true">
         <Image
           src="/images/gallery-3.png"
           alt=""
           fill
           sizes="100vw"
-          className="object-cover opacity-25"
+          className="object-cover opacity-35 scale-125"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/92 to-background/70" />
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/70" />
+      </ParallaxLayer>
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8">
         <div>
@@ -42,7 +45,7 @@ export function Mayorista() {
               id="mayorista-title"
               className="mt-6 font-heading text-4xl font-extrabold tracking-tight text-balance sm:text-5xl"
             >
-              ¿Querés revender championes?
+              <AshText as="span">¿Querés revender championes?</AshText>
             </h2>
             <p className="mt-4 font-heading text-xl font-semibold text-pretty">
               Comprá por mayor y empezá tu negocio.
@@ -54,12 +57,18 @@ export function Mayorista() {
             </p>
           </Reveal>
 
-          <Reveal delay={160} className="mt-8">
+          <Reveal delay={160} className="mt-8 flex flex-wrap gap-4">
+            <a
+              href="/mayoristas"
+              className="inline-flex items-center gap-2.5 rounded-full bg-emerald-500 px-7 py-4 font-heading text-base font-bold text-black shadow-lg shadow-emerald-500/20 transition-transform duration-300 hover:scale-[1.03]"
+            >
+              Ver Propuesta Mayorista
+            </a>
             <a
               href={WA_LINKS.mayorista}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 rounded-full bg-primary px-7 py-4 font-heading text-base font-bold text-primary-foreground shadow-lg shadow-black/40 transition-transform duration-300 hover:scale-[1.03]"
+              className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card px-7 py-4 font-heading text-base font-bold transition-colors hover:bg-secondary"
             >
               <WhatsAppIcon className="size-5" />
               Solicitar precios mayoristas
@@ -74,13 +83,18 @@ export function Mayorista() {
           <h3 className="font-heading text-sm font-bold tracking-[0.18em] text-muted-foreground uppercase">
             Lo que incluye
           </h3>
-          <ul className="mt-6 grid gap-4">
-            {BENEFICIOS.map((b) => (
-              <li key={b} className="flex items-start gap-3">
-                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
-                  <Check className="size-3.5" />
+          <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
+            {BENEFICIOS.map((b, idx) => (
+              <li
+                key={b}
+                className={`flex items-start gap-2 sm:gap-3 p-3 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 sm:bg-transparent sm:border-none sm:p-0 ${
+                  idx === BENEFICIOS.length - 1 ? 'col-span-2 sm:col-span-1' : ''
+                }`}
+              >
+                <span className="mt-0.5 flex size-5 sm:size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
+                  <Check className="size-3 sm:size-3.5" />
                 </span>
-                <span className="font-heading text-base font-semibold text-pretty">
+                <span className="font-heading text-xs sm:text-base font-semibold text-pretty">
                   {b}
                 </span>
               </li>
