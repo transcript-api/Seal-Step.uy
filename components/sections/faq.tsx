@@ -55,10 +55,10 @@ export function Faq() {
             empujando a seguir creciendo.
           </p>
           <Link
-            href="/nosotros"
+            href="/#productos"
             className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 font-heading text-xs font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-secondary"
           >
-            Conocé nuestra historia
+            Ver catálogo completo
             <ArrowRight className="size-4" />
           </Link>
         </Reveal>
