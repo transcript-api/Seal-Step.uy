@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { WhatsAppFloat } from '@/components/whatsapp-float'
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { Reveal } from '@/components/reveal'
@@ -581,7 +580,6 @@ export default function MayoristasPage() {
       </main>
 
       <SiteFooter />
-      <WhatsAppFloat />
     </>
   )
 }

@@ -986,33 +986,67 @@ export const MARCAS: MarcaConfig[] = [
   },
 ]
 
+export function getMarcaFromProducto(p: Producto): string {
+  const nombre = p.nombre.toLowerCase()
+  const cat = p.categoria.toLowerCase()
+  if (nombre.startsWith('nike') || nombre.startsWith('air force') || cat.includes('nike')) return 'nike'
+  if (nombre.startsWith('adidas') || cat.includes('adidas')) return 'adidas'
+  if (nombre.startsWith('new balance') || cat.includes('new balance')) return 'new-balance'
+  if (nombre.startsWith('puma') || cat.includes('puma')) return 'puma'
+  if (nombre.startsWith('vans') || cat.includes('vans')) return 'vans'
+  if (cat.includes('slide') || nombre.includes('slide') || cat.includes('chancla') || nombre.includes('chancla')) return 'slides'
+  return 'otros'
+}
+
 export function getProductosPorMarca(marcaSlug: string): Producto[] {
   const slugLower = marcaSlug.toLowerCase()
-  if (slugLower === 'nike') {
-    return PRODUCTOS.filter((p) => p.nombre.toLowerCase().startsWith('nike') || p.nombre.toLowerCase().startsWith('air force'))
+  if (slugLower === 'todos') return PRODUCTOS
+  return PRODUCTOS.filter((p) => getMarcaFromProducto(p) === slugLower)
+}
+
+export function getProductosPreviewHome(paresPorMarca = 2): Producto[] {
+  const ordenMarcas = ['nike', 'adidas', 'new-balance', 'vans', 'puma', 'slides']
+  const seleccion: Producto[] = []
+  const agregadosSlugs = new Set<string>()
+
+  for (const marca of ordenMarcas) {
+    const productosMarca = PRODUCTOS.filter((p) => getMarcaFromProducto(p) === marca)
+    const primeros = productosMarca.slice(0, paresPorMarca)
+    for (const prod of primeros) {
+      if (!agregadosSlugs.has(prod.slug)) {
+        seleccion.push(prod)
+        agregadosSlugs.add(prod.slug)
+      }
+    }
   }
-  if (slugLower === 'adidas') {
-    return PRODUCTOS.filter((p) => p.nombre.toLowerCase().startsWith('adidas'))
-  }
-  if (slugLower === 'new-balance') {
-    return PRODUCTOS.filter((p) => p.nombre.toLowerCase().startsWith('new balance'))
-  }
-  if (slugLower === 'puma') {
-    return PRODUCTOS.filter((p) => p.nombre.toLowerCase().startsWith('puma'))
-  }
-  if (slugLower === 'vans') {
-    return PRODUCTOS.filter((p) => p.nombre.toLowerCase().startsWith('vans'))
-  }
-  if (slugLower === 'slides') {
-    return PRODUCTOS.filter(
-      (p) =>
-        p.categoria.toLowerCase().includes('slide') ||
-        p.nombre.toLowerCase().includes('slide') ||
-        p.categoria.toLowerCase().includes('chancla') ||
-        p.nombre.toLowerCase().includes('chancla'),
-    )
-  }
-  return []
+
+  return seleccion
+}
+
+export type GrupoMarca = {
+  marca: MarcaConfig
+  productos: Producto[]
+}
+
+export function getProductosOrganizadosPorMarca(): GrupoMarca[] {
+  return MARCAS.map((marca) => {
+    const prods = PRODUCTOS.filter((p) => getMarcaFromProducto(p) === marca.slug)
+    return {
+      marca,
+      productos: prods,
+    }
+  }).filter((g) => g.productos.length > 0)
+}
+
+export function getProductosOrdenadosPorMarca(): Producto[] {
+  const orden = ['nike', 'adidas', 'new-balance', 'vans', 'puma', 'slides', 'otros']
+  return [...PRODUCTOS].sort((a, b) => {
+    const marcaA = getMarcaFromProducto(a)
+    const marcaB = getMarcaFromProducto(b)
+    const indexA = orden.indexOf(marcaA)
+    const indexB = orden.indexOf(marcaB)
+    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB)
+  })
 }
 
 export function getMarcaConfig(marcaSlug: string): MarcaConfig | undefined {

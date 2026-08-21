@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowUpRight, ChevronRight } from 'lucide-react'
 import { getProductosPorMarca, getMarcaConfig } from '@/lib/productos'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { WhatsAppFloat } from '@/components/whatsapp-float'
 import { Reveal } from '@/components/reveal'
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
@@ -153,7 +152,6 @@ export default function SlidesPage() {
       </main>
 
       <SiteFooter />
-      <WhatsAppFloat />
     </div>
   )
 }

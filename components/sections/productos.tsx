@@ -15,7 +15,7 @@ import {
   Ruler,
   Check,
 } from 'lucide-react'
-import { PRODUCTOS, MARCAS, type Producto } from '@/lib/productos'
+import { PRODUCTOS, MARCAS, getProductosPreviewHome, type Producto } from '@/lib/productos'
 import { Reveal } from '@/components/reveal'
 import { useOrder } from '@/lib/order-context'
 import { AshText } from '@/components/ash-text'
@@ -148,13 +148,13 @@ export function Productos() {
     })
   }, [sneakerCatalog, selectedBrand, selectedFilterSize, searchQuery])
 
-  // Pagination for catalog
+  // Preview balanceado con 2 modelos de cada marca para la página principal
   const visibleProducts = useMemo(() => {
-    if (showAllProducts || searchQuery.trim() !== '' || selectedBrand !== 'todos' || selectedFilterSize) {
+    if (searchQuery.trim() !== '' || selectedBrand !== 'todos' || selectedFilterSize) {
       return filteredProducts
     }
-    return filteredProducts.slice(0, 12)
-  }, [filteredProducts, showAllProducts, searchQuery, selectedBrand, selectedFilterSize])
+    return getProductosPreviewHome(2)
+  }, [filteredProducts, searchQuery, selectedBrand, selectedFilterSize])
 
   const scrollDrop = (direction: 'left' | 'right') => {
     if (dropScrollRef.current) {
@@ -207,14 +207,13 @@ export function Productos() {
                 </p>
 
                 <div className="mt-8">
-                  <button
-                    type="button"
-                    onClick={scrollToCatalog}
+                  <Link
+                    href="/catalogo"
                     className="inline-flex items-center gap-2 rounded-full border border-neutral-700 bg-neutral-900/90 px-6 py-3.5 font-heading text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:border-white hover:bg-white hover:text-black hover:scale-[1.03]"
                   >
-                    <span>VER TODOS</span>
+                    <span>VER CATÁLOGO COMPLETO</span>
                     <ChevronRight className="size-4" />
-                  </button>
+                  </Link>
                 </div>
               </div>
 
@@ -622,17 +621,16 @@ export function Productos() {
             })}
           </ul>
 
-          {/* "Ver más modelos" expansion button if there are more products */}
-          {!showAllProducts && filteredProducts.length > 12 && searchQuery.trim() === '' && selectedBrand === 'todos' && !selectedFilterSize && (
-            <Reveal delay={100} className="mt-10 text-center">
-              <button
-                type="button"
-                onClick={() => setShowAllProducts(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-neutral-700 bg-neutral-900 px-8 py-3.5 font-heading text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:border-white hover:bg-white hover:text-black hover:scale-[1.02] shadow-xl"
+          {/* Botón hacia el Catálogo Completo Organizado por Marcas */}
+          {searchQuery.trim() === '' && selectedBrand === 'todos' && !selectedFilterSize && (
+            <Reveal delay={100} className="mt-12 text-center">
+              <Link
+                href="/catalogo"
+                className="inline-flex items-center gap-2.5 rounded-full border border-neutral-700 bg-neutral-900 px-8 py-4 font-heading text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:border-white hover:bg-white hover:text-black hover:scale-[1.02] shadow-xl"
               >
-                <span>Ver todos los modelos ({filteredProducts.length - 12} más)</span>
+                <span>VER TODOS LOS MODELOS ({PRODUCTOS.length} DISPONIBLES)</span>
                 <ChevronRight className="size-4" />
-              </button>
+              </Link>
             </Reveal>
           )}
 

@@ -10,10 +10,13 @@ import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { useOrder } from '@/lib/order-context'
 
 const BRANDS_NAV = [
-  { label: 'Nike', href: '/marca/nike', desc: 'Dunk Low e importados' },
-  { label: 'Adidas', href: '/marca/adidas', desc: 'Campus, Samba, Gazelle' },
+  { label: 'Ver Todo el Catálogo', href: '/catalogo', desc: 'Todos los modelos organizados por marca' },
+  { label: 'Nike', href: '/marca/nike', desc: 'Air Force 1, Dunk Low e importados' },
+  { label: 'Adidas', href: '/marca/adidas', desc: 'Campus, Samba, Gazelle, Bad Bunny' },
   { label: 'New Balance', href: '/marca/new-balance', desc: 'Siluetas 1000 y 9060' },
-  { label: 'Slides', href: '/slides', desc: 'Coleccion de verano' },
+  { label: 'Vans', href: '/marca/vans', desc: 'Knu Skool y Hylane Knit' },
+  { label: 'Puma', href: '/marca/puma', desc: 'Suede XL y urbanos' },
+  { label: 'Slides', href: '/slides', desc: 'Colección de verano' },
 ]
 
 export function SiteHeader() {

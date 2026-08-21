@@ -5,7 +5,6 @@ import { ArrowLeft, ArrowUpRight, ChevronRight } from 'lucide-react'
 import { MARCAS, getProductosPorMarca, getMarcaConfig } from '@/lib/productos'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { WhatsAppFloat } from '@/components/whatsapp-float'
 import { Reveal } from '@/components/reveal'
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
@@ -179,7 +178,6 @@ export default async function MarcaPage({ params }: { params: Promise<{ marca: s
       </main>
 
       <SiteFooter />
-      <WhatsAppFloat />
     </div>
   )
 }
