@@ -77,10 +77,10 @@
 
 @keyframes marquee {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
 }
 
@@ -330,23 +330,25 @@
 }
 
 @keyframes tScrollUp {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -50%, 0); }
 }
 
 @keyframes tScrollDown {
-  from { transform: translateY(-50%); }
-  to   { transform: translateY(0); }
+  from { transform: translate3d(0, -50%, 0); }
+  to   { transform: translate3d(0, 0, 0); }
 }
 
 .t-track-up {
   animation: tScrollUp linear infinite;
   will-change: transform;
+  backface-visibility: hidden;
 }
 
 .t-track-down {
   animation: tScrollDown linear infinite;
   will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* Pause marquee columns on hover over the wrapper */
