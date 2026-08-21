@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useRef, MouseEvent, useEffect, useState } from 'react'
 import { MessageCircle, ShieldCheck, Tag, Truck } from 'lucide-react'
@@ -131,9 +131,9 @@ export function Beneficios() {
           </p>
           <h2
             id="beneficios-title"
-            className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-balance sm:text-5xl"
+            className="mt-4 font-heading text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance"
           >
-            <AshText as="span">Por que elegir Seal Step?</AshText>
+            <AshText as="span">¿Por qué elegir Seal Step?</AshText>
           </h2>
         </Reveal>
 

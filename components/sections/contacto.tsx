@@ -31,7 +31,7 @@ export function Contacto() {
           <div className="relative mx-auto max-w-2xl text-center">
             <h2
               id="contacto-title"
-              className="font-heading text-4xl font-extrabold tracking-tight text-balance sm:text-5xl"
+              className="font-heading text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance"
             >
               <AshText as="span">Hacé tu pedido ahora</AshText>
             </h2>

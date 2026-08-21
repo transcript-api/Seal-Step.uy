@@ -62,8 +62,8 @@ export function Hero() {
                 className="animate-float-logo relative h-16 w-auto object-contain transition-transform duration-500 hover:scale-105 sm:h-24 lg:h-28"
               />
             </div>
-            <p className="mt-5 max-w-xl font-heading text-xl leading-snug font-semibold text-pretty sm:text-2xl">
-              <AshText as="span">Los championes que buscás, al mejor precio y con envío a todo Uruguay.</AshText>
+            <p className="mt-5 max-w-xl font-heading text-base sm:text-xl lg:text-2xl leading-snug font-semibold text-pretty">
+              <AshText as="span">Championes urbanos e importados seleccionados para quienes buscan estilo y comodidad.</AshText>
             </p>
           </Reveal>
 

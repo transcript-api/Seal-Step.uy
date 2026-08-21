@@ -104,7 +104,7 @@ export function AshText({
               </span>
             )
           })}
-          {wordIndex < words.length - 1 && <span className="inline-block">&nbsp;</span>}
+          {wordIndex < words.length - 1 ? '\u00A0' : ''}
         </span>
       ))}
     </Tag>

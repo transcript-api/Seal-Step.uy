@@ -115,7 +115,7 @@ export default function Testimonials() {
           <Star className="size-3.5 fill-foreground text-foreground" />
           Testimonios
         </span>
-        <h2 className="mt-4 font-heading text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+        <h2 className="mt-4 font-heading text-2xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
           <AshText as="span">LO QUE DICEN NUESTROS CLIENTES</AshText>
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">

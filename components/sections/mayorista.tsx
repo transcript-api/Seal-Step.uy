@@ -43,7 +43,7 @@ export function Mayorista() {
           <Reveal delay={80}>
             <h2
               id="mayorista-title"
-              className="mt-6 font-heading text-4xl font-extrabold tracking-tight text-balance sm:text-5xl"
+              className="mt-6 font-heading text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance"
             >
               <AshText as="span">¿Querés revender championes?</AshText>
             </h2>

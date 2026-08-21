@@ -41,7 +41,7 @@ export function Faq() {
           </p>
           <h2
             id="faq-title"
-            className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-balance sm:text-5xl"
+            className="mt-4 font-heading text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance"
           >
             <AshText as="span">¿Querés conocer un poco más de Seal Step?</AshText>
           </h2>
