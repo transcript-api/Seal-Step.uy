@@ -17,6 +17,7 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://sealstep.uy'),
   title: 'Seal Step | Championes y calzado urbano con envíos a todo Uruguay',
   description:
     'Tienda online de championes y calzado urbano para hombre y mujer en Uruguay. Modelos modernos, envíos a todo el país, atención por WhatsApp y ventas por mayor para revendedores.',
@@ -62,6 +63,28 @@ export const viewport: Viewport = {
 
 import { ClientProviders } from '@/components/client-providers'
 
+const storeJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ShoeStore',
+  name: 'Seal Step Uruguay',
+  description:
+    'Tienda online de championes y calzado urbano en Uruguay. Envíos a todo el país y ventas por mayor.',
+  url: 'https://sealstep.uy',
+  telephone: '+59899321703',
+  priceRange: '$$',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Rivera',
+    addressCountry: 'UY',
+  },
+  areaServed: {
+    '@type': 'Country',
+    name: 'Uruguay',
+  },
+  currenciesAccepted: 'UYU',
+  paymentAccepted: 'Transferencia bancaria, Mercado Pago, Efectivo',
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -72,6 +95,12 @@ export default function RootLayout({
       lang="es"
       className={`bg-background ${montserrat.variable} ${poppins.variable}`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd) }}
+        />
+      </head>
       <body className="font-sans antialiased">
         <ClientProviders>
           {children}
