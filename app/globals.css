@@ -353,28 +353,3 @@
 ):hover::after {
   opacity: 1;
 }
-
-/* ── Logo Float Animation ─────────────────────────────── */
-@keyframes logo-float {
-  0%   { transform: translateY(0px) rotate(0deg); }
-  25%  { transform: translateY(-6px) rotate(0.5deg); }
-  50%  { transform: translateY(-10px) rotate(0deg); }
-  75%  { transform: translateY(-6px) rotate(-0.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
-}
-
-@keyframes logo-float-gentle {
-  0%   { transform: translateY(0px); }
-  50%  { transform: translateY(-8px); }
-  100% { transform: translateY(0px); }
-}
-
-.logo-float {
-  animation: logo-float 4s ease-in-out infinite;
-  will-change: transform;
-}
-
-.logo-float-gentle {
-  animation: logo-float-gentle 3.5s ease-in-out infinite;
-  will-change: transform;
-}

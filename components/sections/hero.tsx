@@ -63,14 +63,16 @@ export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
               />
             </div>
             <p className="mt-5 max-w-xl font-heading text-base sm:text-xl lg:text-2xl leading-snug font-semibold text-pretty">
-              <AshText as="span">Championes que querés usar. Modelos que vale la pena tener.</AshText>
+              <AshText as="span">
+                Championes urbanos e importados seleccionados para quienes buscan estilo y comodidad.
+              </AshText>
             </p>
           </Reveal>
 
           <Reveal delay={160}>
             <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">
               <AshText as="span">
-                Encontrá modelos de Nike, Adidas, New Balance y más. Comprá online o escribinos por WhatsApp.
+                Modelos modernos, atención personalizada y entregas rápidas. Comprá desde cualquier parte del país o consultá por precios especiales para revendedores.
               </AshText>
             </p>
           </Reveal>
@@ -94,7 +96,7 @@ export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
               rel="noopener noreferrer"
               className="group inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-7 py-4 font-heading text-base font-bold transition-colors duration-300 hover:bg-secondary"
             >
-              <AshText as="span">Ver modelos</AshText>
+              <AshText as="span">Consultar catálogo</AshText>
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
           </Reveal>
