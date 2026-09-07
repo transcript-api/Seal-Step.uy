@@ -67,7 +67,7 @@ export function SiteHeader() {
             width={458}
             height={97}
             priority
-            className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105 sm:h-14 lg:h-16"
+            className="h-11 w-auto object-contain logo-float sm:h-14 lg:h-16"
           />
         </Link>
 

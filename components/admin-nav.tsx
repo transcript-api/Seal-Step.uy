@@ -77,7 +77,7 @@ export function AdminNav() {
                   src="/images/seal-step-logo.png"
                   alt="Seal Step Logo"
                   fill
-                  className="object-contain object-left group-hover:scale-105 transition-transform duration-300"
+                  className="object-contain object-left logo-float-gentle"
                   priority
                 />
               </div>
