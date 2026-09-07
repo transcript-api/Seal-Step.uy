@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { AsYouType, isValidPhoneNumber, CountryCode } from 'libphonenumber-js'
+import { AsYouType, isValidPhoneNumber, parsePhoneNumber, CountryCode } from 'libphonenumber-js'
 import { POPULAR_COUNTRIES, CountryInfo, DEFAULT_COUNTRY } from '@/lib/countries'
 import { ChevronDown, CheckCircle2, AlertCircle, Search } from 'lucide-react'
 
@@ -77,23 +77,35 @@ export function PhoneInput({
     )
   })
 
-  // Validar con libphonenumber
-  const fullE164 = `${selectedCountry.dialCode}${nationalDigits.replace(/\D/g, '')}`
-  const isValid = nationalDigits.trim().length >= 4 && isValidPhoneNumber(fullE164, selectedCountry.code as CountryCode)
+  // Helper para validar número
+  const checkValidity = (digits: string, country: CountryInfo) => {
+    const clean = digits.trim()
+    if (!clean || clean.replace(/\D/g, '').length < 4) {
+      return { valid: false, formattedFull: '' }
+    }
+    try {
+      const parsed = parsePhoneNumber(clean, country.code as CountryCode)
+      if (parsed && parsed.isValid()) {
+        return { valid: true, formattedFull: parsed.formatInternational() }
+      }
+    } catch {
+      // Ignorar error de parsing y probar fallback
+    }
+    const testE164 = `${country.dialCode}${clean.replace(/\D/g, '')}`
+    const valid = isValidPhoneNumber(testE164, country.code as CountryCode)
+    return { valid, formattedFull: `${country.dialCode} ${clean}` }
+  }
+
+  const { valid: isValid } = checkValidity(nationalDigits, selectedCountry)
 
   const handleInputChange = (raw: string) => {
     setTouched(true)
-    // Formatear automáticamente mientras escribe
     const formatter = new AsYouType(selectedCountry.code as CountryCode)
     const formatted = formatter.input(raw)
     setNationalDigits(formatted)
 
-    const cleanDigits = raw.replace(/\D/g, '')
-    const fullNumber = cleanDigits ? `${selectedCountry.dialCode} ${formatted}` : ''
-    const testE164 = `${selectedCountry.dialCode}${cleanDigits}`
-    const valid = cleanDigits.length >= 4 && isValidPhoneNumber(testE164, selectedCountry.code as CountryCode)
-
-    onChange(fullNumber, valid, selectedCountry)
+    const result = checkValidity(raw, selectedCountry)
+    onChange(result.formattedFull || (raw ? `${selectedCountry.dialCode} ${raw}` : ''), result.valid, selectedCountry)
   }
 
   const handleSelectCountry = (country: CountryInfo) => {
@@ -101,17 +113,12 @@ export function PhoneInput({
     setIsOpen(false)
     setSearchQuery('')
 
-    // Re-evaluar con el nuevo país
-    const cleanDigits = nationalDigits.replace(/\D/g, '')
     const formatter = new AsYouType(country.code as CountryCode)
     const formatted = formatter.input(nationalDigits)
     setNationalDigits(formatted)
 
-    const fullNumber = cleanDigits ? `${country.dialCode} ${formatted}` : ''
-    const testE164 = `${country.dialCode}${cleanDigits}`
-    const valid = cleanDigits.length >= 4 && isValidPhoneNumber(testE164, country.code as CountryCode)
-
-    onChange(fullNumber, valid, country)
+    const result = checkValidity(nationalDigits, country)
+    onChange(result.formattedFull || (nationalDigits ? `${country.dialCode} ${nationalDigits}` : ''), result.valid, country)
     setTimeout(() => inputRef.current?.focus(), 50)
   }
 
