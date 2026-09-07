@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProductoDetalle } from '@/components/producto-detalle'
-import { PRODUCTOS, getProducto, getMarcaFromProducto } from '@/lib/productos'
+import { getMarcaFromProducto } from '@/lib/productos'
+import { getProductos, getProductoBySlug } from '@/lib/productos-db'
 
-export function generateStaticParams() {
-  return PRODUCTOS.map((producto) => ({
+export async function generateStaticParams() {
+  const productos = await getProductos()
+  return productos.map((producto) => ({
     slug: producto.slug,
   }))
 }
@@ -15,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const producto = getProducto(slug)
+  const producto = await getProductoBySlug(slug)
 
   if (!producto) {
     return { title: 'Producto no encontrado | Seal Step' }
@@ -55,7 +57,7 @@ export default async function ProductoPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const producto = getProducto(slug)
+  const producto = await getProductoBySlug(slug)
 
   if (!producto) {
     notFound()

@@ -24,6 +24,10 @@ import { MayoristaVideo } from '@/components/sections/mayorista-video'
 import { AshText } from '@/components/ash-text'
 import { CounterStat } from '@/components/counter-stat'
 import { ParallaxLayer } from '@/components/parallax-layer'
+import { getSiteVideos } from '@/lib/videos'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'Ventas por Mayor y Revendedores de Calzado | Seal Step Uruguay',
@@ -186,7 +190,10 @@ const FAQS_MAYORISTAS = [
   },
 ]
 
-export default function MayoristasPage() {
+export default async function MayoristasPage() {
+  const siteVideos = getSiteVideos()
+  const mayoristaVideo = siteVideos.mayoristaVideo
+
   return (
     <>
       <SiteHeader />
@@ -276,8 +283,8 @@ export default function MayoristasPage() {
           </div>
         </section>
 
-        {/* VIDEO DE PRESENTACIÓN DEL FUNDADOR */}
-        <MayoristaVideo videoSrc="/Videos/fundador-mayorista.mp4" />
+        {/* VIDEO DE PRESENTACIÓN DEL FUNDADOR - dinámico desde panel admin */}
+        <MayoristaVideo videoSrc={mayoristaVideo.videoSrc} posterSrc={mayoristaVideo.posterSrc} />
 
         {/* SIMULADOR DE RENTABILIDAD */}
         <section id="simulador" className="relative border-b border-border py-16 lg:py-24">

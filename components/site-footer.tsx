@@ -45,7 +45,7 @@ export function SiteFooter() {
             alt="Seal Step"
             width={458}
             height={97}
-            className="h-10 w-auto object-contain sm:h-12"
+            className="h-14 w-auto object-contain sm:h-16 transition-transform duration-300 hover:scale-105"
           />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
             Championes y calzado urbano para hombre y mujer. Envíos a todo

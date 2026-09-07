@@ -42,7 +42,16 @@ const FEATURED_DROPS = [
   },
 ]
 
-export function Productos() {
+import { DropVideoItem } from '@/lib/videos'
+
+export function Productos({
+  initialProducts,
+  dropVideos,
+}: {
+  initialProducts?: Producto[]
+  dropVideos?: DropVideoItem[]
+} = {}) {
+  const catalogSource = initialProducts && initialProducts.length > 0 ? initialProducts : PRODUCTOS
   const [selectedBrand, setSelectedBrand] = useState<string>('todos')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [showAllProducts, setShowAllProducts] = useState(false)
@@ -76,26 +85,49 @@ export function Productos() {
   }
 
   const sneakerCatalog = useMemo(() => {
-    return PRODUCTOS.filter(
+    return catalogSource.filter(
       (p) =>
         !p.categoria.toLowerCase().includes('slide') &&
         !p.nombre.toLowerCase().includes('slide') &&
         !p.categoria.toLowerCase().includes('chancla') &&
         !p.nombre.toLowerCase().includes('chancla'),
     )
-  }, [])
+  }, [catalogSource])
 
   const dropProducts = useMemo(() => {
-    return FEATURED_DROPS.map((item) => {
-      const prod = sneakerCatalog.find((p) => p.slug === item.slug)
-      if (!prod) return null
-      return {
-        ...prod,
-        customImage: item.customImage,
-        videoSrc: item.videoSrc,
+    const listToUse = dropVideos && dropVideos.length > 0 ? dropVideos : FEATURED_DROPS
+    const resolved: (Producto & { customImage?: string; videoSrc?: string })[] = []
+
+    // 1. Mapear cada elemento de la lista configurada
+    listToUse.forEach((item) => {
+      const prod =
+        sneakerCatalog.find((p) => p.slug === item.slug) ||
+        sneakerCatalog.find((p) => (p as any).id === item.slug) ||
+        sneakerCatalog.find((p) => p.nombre.toLowerCase().includes(item.slug.replace(/-/g, ' ')))
+      if (prod) {
+        resolved.push({
+          ...prod,
+          customImage: (item as any).customImage ?? (item as any).poster ?? prod.imagenes[0]?.src,
+          videoSrc: item.videoSrc,
+        })
       }
-    }).filter(Boolean) as (Producto & { customImage?: string; videoSrc?: string })[]
-  }, [sneakerCatalog])
+    })
+
+    // 2. Adaptable: Si hay menos de 4 o si no se encontró alguno, rellenar automáticamente con modelos top del catálogo
+    if (resolved.length < 4 && sneakerCatalog.length > 0) {
+      for (const prod of sneakerCatalog) {
+        if (!resolved.some((r) => r.slug === prod.slug)) {
+          resolved.push({
+            ...prod,
+            customImage: prod.imagenes[0]?.src,
+          })
+        }
+        if (resolved.length >= 6) break
+      }
+    }
+
+    return resolved
+  }, [sneakerCatalog, dropVideos])
 
   const filteredProducts = useMemo(() => {
     return sneakerCatalog.filter((producto) => {
@@ -628,7 +660,7 @@ export function Productos() {
                 href="/catalogo"
                 className="inline-flex items-center gap-2.5 rounded-full border border-neutral-700 bg-neutral-900 px-8 py-4 font-heading text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:border-white hover:bg-white hover:text-black hover:scale-[1.02] shadow-xl"
               >
-                <span>VER TODOS LOS MODELOS ({PRODUCTOS.length} DISPONIBLES)</span>
+                <span>VER TODOS LOS MODELOS ({catalogSource.length} DISPONIBLES)</span>
                 <ChevronRight className="size-4" />
               </Link>
             </Reveal>

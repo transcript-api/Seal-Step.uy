@@ -10,9 +10,9 @@ import { ParallaxLayer } from '@/components/parallax-layer'
 const BENEFICIOS = [
   'Descuentos por cantidad',
   'Stock actualizado',
-  'Atención personalizada',
-  'Ideal para revendedores',
-  'Oportunidad de generar ingresos',
+  'Atención directa',
+  'Para negocios y revendedores',
+  'Distintos volúmenes disponibles',
 ]
 
 export function Mayorista() {
@@ -37,7 +37,7 @@ export function Mayorista() {
         <div>
           <Reveal className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
             <TrendingUp className="size-3.5" />
-            Programa mayorista Seal Step
+            Venta por mayor
           </Reveal>
 
           <Reveal delay={80}>
@@ -48,12 +48,10 @@ export function Mayorista() {
               <AshText as="span">¿Querés revender championes?</AshText>
             </h2>
             <p className="mt-4 font-heading text-xl font-semibold text-pretty">
-              Comprá por mayor y empezá tu negocio.
+              Comprá por mayor y armá tu negocio.
             </p>
             <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">
-              Si tenés una tienda, emprendimiento o querés comenzar a vender
-              calzado, Seal Step también ofrece ventas por mayor con condiciones
-              especiales.
+              Si tenés un negocio y querés sumar championes a tu catálogo, trabajamos con venta por mayor.
             </p>
           </Reveal>
 
@@ -62,7 +60,7 @@ export function Mayorista() {
               href="/mayoristas"
               className="inline-flex items-center gap-2.5 rounded-full bg-emerald-500 px-7 py-4 font-heading text-base font-bold text-black shadow-lg shadow-emerald-500/20 transition-transform duration-300 hover:scale-[1.03]"
             >
-              Ver Propuesta Mayorista
+              Ver opciones para mayoristas
             </a>
             <a
               href={WA_LINKS.mayorista}
@@ -71,7 +69,7 @@ export function Mayorista() {
               className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card px-7 py-4 font-heading text-base font-bold transition-colors hover:bg-secondary"
             >
               <WhatsAppIcon className="size-5" />
-              Solicitar precios mayoristas
+              Escribinos por WhatsApp
             </a>
           </Reveal>
         </div>
@@ -101,7 +99,7 @@ export function Mayorista() {
             ))}
           </ul>
           <p className="mt-6 border-t border-border pt-5 text-sm leading-relaxed text-muted-foreground">
-            Escribinos y armamos un presupuesto según la cantidad de pares que
+            Escribínos y armamos un presupuesto según la cantidad de pares que
             necesités.
           </p>
         </Reveal>

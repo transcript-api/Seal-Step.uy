@@ -1,0 +1,140 @@
+{
+  "dropVideos": [
+    {
+      "id": "drop-1",
+      "slug": "nike-dunk-low-panda",
+      "title": "Nike Dunk Low Panda (The Drop)",
+      "videoSrc": "/Videos%20sin%20sonido/sealstep_DXZf-EiDVE4.mp4",
+      "poster": "/images/nike-dunk-low-panda/01.jpg"
+    },
+    {
+      "id": "drop-2",
+      "slug": "new-balance-1000",
+      "title": "New Balance 1000 Commercial (The Drop)",
+      "videoSrc": "/videos%20drop/New_Balance_sneaker_commercial_v…_202608170609 (4).mp4",
+      "poster": "/images/new-balance-1000/01.jpg"
+    },
+    {
+      "id": "drop-3",
+      "slug": "adidas-campus-00s",
+      "title": "Adidas Campus 00s Core Black",
+      "videoSrc": "/Videos%20sin%20sonido/sealstep_DJMpagGxIsh.mp4",
+      "poster": "/images/ADIDAS CAMPUS 00s/01.jpg"
+    },
+    {
+      "id": "drop-4",
+      "slug": "vans-knu-skool-clasicas",
+      "title": "Vans Knu Skool Clásicas",
+      "videoSrc": "/Videos%20sin%20sonido/sealstep_DG894csS2o2.mp4",
+      "poster": "/images/VANS KNU SKOOL Clasicas/01.jpg"
+    },
+    {
+      "id": "drop-5",
+      "slug": "nike-dunk-low-storm-off-latex",
+      "title": "Nike Dunk Low Storm Latex",
+      "videoSrc": "",
+      "poster": "/images/nike-dunk-low-storm-off-latex/01.jpg"
+    },
+    {
+      "id": "drop-6",
+      "slug": "adidas-samba-blanco-negro",
+      "title": "Adidas Samba Luxo OG",
+      "videoSrc": "",
+      "poster": "/images/adidas-samba-blanco-negro/01.jpg"
+    }
+  ],
+  "heroCarousel": [
+    {
+      "id": "hero-slide-1",
+      "image": "/images/adidas-campus-gris-blanco/01.jpg",
+      "videoSrc": "/Videos%20sin%20sonido/sealstep_DJMpagGxIsh.mp4",
+      "title": "Adidas Campus",
+      "description": "Gris y blanco en gamuza suave con cordones anchos.",
+      "badge": "NUEVO INGRESO",
+      "href": "/producto/adidas-campus-gris-blanco"
+    },
+    {
+      "id": "hero-slide-2",
+      "image": "/images/nike-dunk-low-azul/01.jpg",
+      "videoSrc": "/Videos%20sin%20sonido/sealstep_DG894csS2o2.mp4",
+      "title": "Nike Dunk Low Azul",
+      "description": "Clásico diseño retro urbano en cuero premium.",
+      "badge": "DESTACADO",
+      "href": "/producto/nike-dunk-low-azul"
+    },
+    {
+      "id": "hero-slide-3",
+      "image": "/images/new-balance-9060/01.jpg",
+      "videoSrc": "/Videos%20sin%20sonido/sealstep_DQFNL6yD_oi.mp4",
+      "title": "New Balance 9060",
+      "description": "Silueta chunky en blanco, gris y off white.",
+      "badge": "TENDENCIA",
+      "href": "/producto/new-balance-9060"
+    },
+    {
+      "id": "hero-slide-4",
+      "image": "/images/nike-dunk-low-storm-off-latex/01.jpg",
+      "videoSrc": "/Videos%20sin%20sonido/sealstep_DXZf-EiDVE4.mp4",
+      "title": "Dunk Storm Latex",
+      "description": "Off white con suela de goma latex exclusiva.",
+      "badge": "IMPORTADO",
+      "href": "/producto/nike-dunk-low-storm-off-latex"
+    },
+    {
+      "id": "hero-slide-5",
+      "image": "/images/adidas-samba-blanco-negro/01.jpg",
+      "videoSrc": "",
+      "title": "Adidas Samba Luxo",
+      "description": "Silueta atemporal con acabados de primera calidad.",
+      "badge": "LINHA LUXO",
+      "href": "/producto/adidas-samba-blanco-negro"
+    },
+    {
+      "id": "hero-slide-6",
+      "image": "/images/new-balance-1000/01.jpg",
+      "videoSrc": "/videos%20drop/New_Balance_sneaker_commercial_v…_202608170609 (4).mp4",
+      "title": "New Balance 1000",
+      "description": "Tonalidad Azul / Off White con confort superior.",
+      "badge": "RETRO TECH",
+      "href": "/producto/new-balance-1000"
+    }
+  ],
+  "mayoristaVideo": {
+    "title": "Presentación Mayoristas & Showroom Rivera",
+    "videoSrc": "/Videos/fundador-mayorista.mp4",
+    "posterSrc": "/images/productos/toddler-botitas-plataforma-marron/1.jpg",
+    "subtitle": "Conocé en persona cómo funciona la logística y los envíos directos"
+  },
+  "galeriaReels": [
+    {
+      "id": "reel-1",
+      "src": "/Videos%20sin%20sonido/sealstep_DG894csS2o2.mp4",
+      "tag": "Nike",
+      "label": "Revisá la calidad"
+    },
+    {
+      "id": "reel-2",
+      "src": "/Videos%20sin%20sonido/sealstep_DJMpagGxIsh.mp4",
+      "tag": "Adidas",
+      "label": "Mirá los detalles"
+    },
+    {
+      "id": "reel-3",
+      "src": "/Videos%20sin%20sonido/sealstep_DQFNL6yD_oi.mp4",
+      "tag": "New Balance",
+      "label": "En nuestras manos"
+    },
+    {
+      "id": "reel-4",
+      "src": "/Videos%20sin%20sonido/sealstep_DXZf-EiDVE4.mp4",
+      "tag": "Importados",
+      "label": "Nuevos ingresos"
+    },
+    {
+      "id": "reel-5",
+      "src": "/Videos%20sin%20sonido/sealstep_DYz8pL1R5DJ.mp4",
+      "tag": "Stock disponible",
+      "label": "Modelos actuales"
+    }
+  ]
+}

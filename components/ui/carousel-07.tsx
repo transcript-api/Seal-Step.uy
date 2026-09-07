@@ -13,7 +13,9 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
 export interface Slide {
+  id?: string
   image: string
+  videoSrc?: string
   title: string
   description: string
   badge: string
@@ -252,11 +254,23 @@ const Card = ({ slide, index, total, progress, config }: CardProps) => {
         'w-48 h-64 sm:w-60 sm:h-80 lg:w-72 lg:h-96',
       )}
     >
-      <img
-        src={slide.image}
-        alt={slide.title}
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-700 group-hover:scale-105"
-      />
+      {slide.videoSrc ? (
+        <video
+          src={slide.videoSrc}
+          poster={slide.image}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <img
+          src={slide.image}
+          alt={slide.title}
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-700 group-hover:scale-105"
+        />
+      )}
 
       <motion.div
         style={{

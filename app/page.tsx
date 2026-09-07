@@ -10,19 +10,27 @@ import { Galeria } from '@/components/sections/galeria'
 import { Faq } from '@/components/sections/faq'
 import { Contacto } from '@/components/sections/contacto'
 import Testimonials from '@/components/sections/testimonials'
+import { getProductos } from '@/lib/productos-db'
+import { getSiteVideos } from '@/lib/videos'
 
-export default function Page() {
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export default async function Page() {
+  const productos = await getProductos()
+  const siteVideos = getSiteVideos()
+
   return (
     <>
       <SiteHeader />
       <main>
-        <Hero />
+        <Hero carouselSlides={siteVideos.heroCarousel} />
         <Marquee />
-        <Productos />
+        <Productos initialProducts={productos} dropVideos={siteVideos.dropVideos} />
         <Beneficios />
         <ChanclasSlideBanner />
         <Mayorista />
-        <Galeria />
+        <Galeria initialVideos={siteVideos.galeriaReels} />
         <Testimonials />
         <Faq />
         <Contacto />

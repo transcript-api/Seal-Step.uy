@@ -8,7 +8,9 @@ import { InstagramIcon } from '@/components/instagram-icon'
 import { Reveal } from '@/components/reveal'
 import { AshText } from '@/components/ash-text'
 
-const VIDEOS = [
+import { ReelItem } from '@/lib/videos'
+
+const FALLBACK_VIDEOS: ReelItem[] = [
   {
     id: 'video-1',
     src: '/Videos%20sin%20sonido/sealstep_DG894csS2o2.mp4',
@@ -41,7 +43,7 @@ const VIDEOS = [
   },
 ]
 
-function VideoCard({ video, index }: { video: (typeof VIDEOS)[0]; index: number }) {
+function VideoCard({ video, index }: { video: ReelItem; index: number }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(true)
 
@@ -123,10 +125,12 @@ function VideoCard({ video, index }: { video: (typeof VIDEOS)[0]; index: number 
   )
 }
 
-export function Galeria() {
+export function Galeria({ initialVideos }: { initialVideos?: ReelItem[] }) {
+  const videos = initialVideos && initialVideos.length > 0 ? initialVideos : FALLBACK_VIDEOS
+
   return (
     <section
-      id="galeria"
+      id="videos"
       className="relative border-b border-border py-20 lg:py-28 overflow-hidden"
       aria-labelledby="videos-title"
     >
@@ -174,9 +178,9 @@ export function Galeria() {
           </div>
         </Reveal>
 
-        {/* 5-Video Reel Grid */}
+        {/* Dynamic Video Reel Grid */}
         <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-5">
-          {VIDEOS.map((video, index) => (
+          {videos.map((video, index) => (
             <VideoCard key={video.id} video={video} index={index} />
           ))}
         </div>

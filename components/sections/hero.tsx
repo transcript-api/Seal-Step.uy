@@ -3,7 +3,7 @@ import { ArrowRight, Check, MapPin, ShieldCheck, Sparkles, TrendingUp, Truck } f
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { Reveal } from '@/components/reveal'
-import { CarouselStacked } from '@/components/ui/carousel-07'
+import { CarouselStacked, type Slide } from '@/components/ui/carousel-07'
 import { AshText } from '@/components/ash-text'
 import { CounterStat } from '@/components/counter-stat'
 import { ParallaxLayer } from '@/components/parallax-layer'
@@ -15,7 +15,7 @@ const STATS_HERO = [
   { value: 50, prefix: '+', suffix: '', label: 'Revendedores', icon: TrendingUp },
 ]
 
-export function Hero() {
+export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
   return (
     <section
       id="top"
@@ -59,18 +59,18 @@ export function Hero() {
                 width={458}
                 height={97}
                 priority
-                className="animate-float-logo relative h-16 w-auto object-contain transition-transform duration-500 hover:scale-105 sm:h-24 lg:h-28"
+                className="animate-float-logo relative h-20 w-auto object-contain transition-transform duration-500 hover:scale-105 sm:h-28 lg:h-36 max-w-[90vw]"
               />
             </div>
             <p className="mt-5 max-w-xl font-heading text-base sm:text-xl lg:text-2xl leading-snug font-semibold text-pretty">
-              <AshText as="span">Championes urbanos e importados seleccionados para quienes buscan estilo y comodidad.</AshText>
+              <AshText as="span">Championes que querés usar. Modelos que vale la pena tener.</AshText>
             </p>
           </Reveal>
 
           <Reveal delay={160}>
             <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">
               <AshText as="span">
-                Modelos modernos, atención personalizada y entregas rápidas. Comprá desde cualquier parte del país o consultá por precios especiales para revendedores.
+                Encontrá modelos de Nike, Adidas, New Balance y más. Comprá online o escribinos por WhatsApp.
               </AshText>
             </p>
           </Reveal>
@@ -94,7 +94,7 @@ export function Hero() {
               rel="noopener noreferrer"
               className="group inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-7 py-4 font-heading text-base font-bold transition-colors duration-300 hover:bg-secondary"
             >
-              <AshText as="span">Consultar catálogo</AshText>
+              <AshText as="span">Ver modelos</AshText>
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
           </Reveal>
@@ -125,7 +125,7 @@ export function Hero() {
         {/* Carrusel 1 - Modelos destacados en abanico 3D con Parallax Layer */}
         <Reveal delay={200} className="relative w-full flex items-center justify-center">
           <ParallaxLayer speed={-0.12} className="w-full">
-            <CarouselStacked />
+            <CarouselStacked slides={carouselSlides} />
           </ParallaxLayer>
         </Reveal>
       </div>

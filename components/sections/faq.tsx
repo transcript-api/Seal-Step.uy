@@ -7,23 +7,23 @@ import { AshText } from '@/components/ash-text'
 const FAQS = [
   {
     q: '¿Hacen envíos a todo Uruguay?',
-    a: 'Sí, realizamos envíos a cualquier departamento del país.',
+    a: 'Sí, enviamos a cualquier departamento del país.',
   },
   {
-    q: '¿Cuánto demora la entrega?',
-    a: 'Dependiendo de la ubicación, normalmente entre 24 y 72 horas.',
+    q: '¿Cuánto demora el envío?',
+    a: 'Por lo general entre 24 y 72 horas, dependiendo de donde estés.',
   },
   {
     q: '¿Cómo puedo pagar?',
     a: 'Transferencia bancaria, Mercado Pago y otros métodos disponibles.',
   },
   {
-    q: '¿Tienen ventas por mayor?',
-    a: 'Sí. Ofrecemos precios especiales para revendedores y compras por volumen.',
+    q: '¿Tienen venta por mayor?',
+    a: 'Sí. Tenemos precios especiales para revendedores y compras por volumen.',
   },
   {
-    q: '¿Cómo hago mi pedido?',
-    a: 'Simplemente escribinos por WhatsApp y te ayudaremos con todo el proceso.',
+    q: '¿Cómo hago un pedido?',
+    a: 'Escribínos por WhatsApp, eligís el modelo y te ayudamos con todo.',
   },
 ]
 
@@ -37,7 +37,7 @@ export function Faq() {
       <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:px-8">
         <Reveal>
           <p className="font-heading text-xs font-bold tracking-[0.22em] text-muted-foreground uppercase">
-            ey, antes de seguir...
+            Antes de comprar...
           </p>
           <h2
             id="faq-title"
@@ -55,10 +55,10 @@ export function Faq() {
             empujando a seguir creciendo.
           </p>
           <Link
-            href="/#productos"
+            href="/catalogo"
             className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 font-heading text-xs font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-secondary"
           >
-            Ver catálogo completo
+            Ver modelos
             <ArrowRight className="size-4" />
           </Link>
         </Reveal>

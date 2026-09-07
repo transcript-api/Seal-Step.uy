@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 
 interface AshTextProps {
-  children: string
+  children?: string
+  text?: string
   className?: string
   /** Delay inicial antes de que arranque la animación (ms) */
   delay?: number
@@ -19,6 +20,7 @@ interface AshTextProps {
  */
 export function AshText({
   children,
+  text,
   className = '',
   delay = 0,
   stagger = 22,
@@ -27,10 +29,12 @@ export function AshText({
   const ref = useRef<HTMLElement | null>(null)
   const [active, setActive] = useState(false)
 
+  const rawText = children || text || ''
+
   // Agrupamos por palabras para que NUNCA se parta una palabra al final de la línea en pantallas chicas
   const words = useMemo(() => {
     let globalCharIndex = 0
-    return children.split(' ').map((word) => {
+    return rawText.split(' ').map((word) => {
       const chars = word.split('').map((char) => {
         const index = globalCharIndex++
         const angle = (index * 47) % 360

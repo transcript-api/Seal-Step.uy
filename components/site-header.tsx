@@ -59,15 +59,15 @@ export function SiteHeader() {
           : 'border-b border-transparent bg-background/40 backdrop-blur-md',
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-18 lg:px-8">
-        <Link href="/" className="flex items-center" aria-label="Seal Step, inicio">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-24 lg:px-8">
+        <Link href="/" className="flex items-center group py-2" aria-label="Seal Step, inicio">
           <Image
             src="/images/seal-step-logo.png"
             alt="Seal Step"
             width={458}
             height={97}
             priority
-            className="h-8 w-auto object-contain sm:h-9 lg:h-10"
+            className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105 sm:h-14 lg:h-16"
           />
         </Link>
 
@@ -198,7 +198,7 @@ export function SiteHeader() {
 
       {/* Mobile Menu Drawer */}
       {open && (
-        <div className="h-[calc(100dvh-4rem)] overflow-y-auto border-t border-border bg-background lg:hidden">
+        <div className="h-[calc(100dvh-5rem)] overflow-y-auto border-t border-border bg-background lg:hidden">
           <nav aria-label="Navegación móvil" className="mx-auto flex max-w-7xl flex-col px-4 py-4 sm:px-6">
             <Link
               href="/#productos"

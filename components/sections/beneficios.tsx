@@ -9,23 +9,23 @@ import { Reveal } from '@/components/reveal'
 const BENEFICIOS = [
   {
     icon: Truck,
-    titulo: 'Envios a todo el pais',
-    texto: 'Recibi tu pedido estes donde estes.',
+    titulo: 'Envíos a todo el país',
+    texto: 'Despachamos tu pedido y te mantenemos al tanto.',
   },
   {
     icon: MessageCircle,
-    titulo: 'Atencion personalizada',
-    texto: 'Te ayudamos a elegir el modelo ideal.',
+    titulo: 'Atención personalizada',
+    texto: 'Si no sabés qué elegir, escribinos y te ayudamos.',
   },
   {
     icon: Tag,
-    titulo: 'Excelente relacion calidad-precio',
-    texto: 'Productos seleccionados para ofrecer el mejor valor.',
+    titulo: 'Buenos pares, precios razonables',
+    texto: 'Buscamos ofrecer modelos que tengan sentido por lo que cuestan.',
   },
   {
     icon: ShieldCheck,
     titulo: 'Compra segura',
-    texto: 'Proceso simple y transparente.',
+    texto: 'Pagás tranquilo y recibís seguimiento de tu pedido.',
   },
 ]
 

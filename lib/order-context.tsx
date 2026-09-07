@@ -21,6 +21,7 @@ type OrderContextType = {
   setIsDrawerOpen: (open: boolean) => void
   quickViewProduct: Producto | null
   setQuickViewProduct: (product: Producto | null) => void
+  openQuickView: (product: Producto) => void
   isSizeGuideOpen: boolean
   setIsSizeGuideOpen: (open: boolean) => void
   isQuizOpen: boolean
@@ -113,6 +114,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setIsDrawerOpen,
         quickViewProduct,
         setQuickViewProduct,
+        openQuickView: (p: Producto) => setQuickViewProduct(p),
         isSizeGuideOpen,
         setIsSizeGuideOpen,
         isQuizOpen,
