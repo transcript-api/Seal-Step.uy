@@ -67,7 +67,12 @@ export async function createPreference({
     }
   }
 
-  const payload = {
+  const isHttps = baseUrl?.startsWith('https://') && !baseUrl.includes('localhost')
+  const publicBaseUrl = isHttps
+    ? baseUrl
+    : (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://seal-step-uy.vercel.app')
+
+  const payload: Record<string, unknown> = {
     items: items.map((item) => ({
       id: item.id,
       title: item.title,
@@ -85,18 +90,21 @@ export async function createPreference({
       address: payer.address,
     },
     back_urls: {
-      success: `${baseUrl}/checkout/exito?order_id=${orderId}`,
-      failure: `${baseUrl}/checkout/fallo?order_id=${orderId}`,
-      pending: `${baseUrl}/checkout/pendiente?order_id=${orderId}`,
+      success: `${publicBaseUrl}/checkout/exito?order_id=${orderId}`,
+      failure: `${publicBaseUrl}/checkout/fallo?order_id=${orderId}`,
+      pending: `${publicBaseUrl}/checkout/pendiente?order_id=${orderId}`,
     },
     auto_return: 'approved',
     external_reference: orderId,
     statement_descriptor: 'SEAL STEP',
-    notification_url: `${baseUrl}/api/webhooks/mercadopago`,
     payment_methods: {
       excluded_payment_types: [],
       installments: 12,
     },
+  }
+
+  if (publicBaseUrl.startsWith('https://')) {
+    payload.notification_url = `${publicBaseUrl}/api/webhooks/mercadopago`
   }
 
   const response = await fetch('https://api.mercadopago.com/checkout/preferences', {

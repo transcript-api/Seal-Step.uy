@@ -13,10 +13,22 @@ import {
   AlertCircle,
   RotateCcw,
   Sparkles,
+  Percent,
+  Layers,
+  Plus,
+  Trash2,
 } from 'lucide-react'
 import { DEFAULT_SITE_CONFIG, type SiteConfig } from '@/lib/site-config'
 
-type TabType = 'contacto' | 'metricas' | 'envios' | 'anuncios' | 'mercadopago'
+type TabType = 'contacto' | 'metricas' | 'envios' | 'anuncios' | 'mercadopago' | 'mayorista'
+
+export interface ReglaMayoristaUI {
+  id?: string
+  nombre: string
+  cantidad_minima: number
+  cantidad_maxima: number | null
+  valor_descuento: number
+}
 
 export default function AdminConfiguracionPage() {
   const [config, setConfig] = useState<SiteConfig>(DEFAULT_SITE_CONFIG)
@@ -24,6 +36,8 @@ export default function AdminConfiguracionPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [reglasMayorista, setReglasMayorista] = useState<ReglaMayoristaUI[]>([])
+  const [savingMayorista, setSavingMayorista] = useState(false)
 
   useEffect(() => {
     async function loadConfig() {
@@ -39,7 +53,21 @@ export default function AdminConfiguracionPage() {
         setLoading(false)
       }
     }
+
+    async function loadReglas() {
+      try {
+        const res = await fetch('/api/descuentos')
+        const data = await res.json()
+        if (data.reglas && Array.isArray(data.reglas)) {
+          setReglasMayorista(data.reglas)
+        }
+      } catch (err) {
+        console.error('Error al cargar reglas mayoristas:', err)
+      }
+    }
+
     loadConfig()
+    loadReglas()
   }, [])
 
   const handleSave = async (e?: React.FormEvent) => {
@@ -71,6 +99,29 @@ export default function AdminConfiguracionPage() {
     if (confirm('¿Deseás restaurar todos los valores por defecto iniciales?')) {
       setConfig(DEFAULT_SITE_CONFIG)
       setStatusMessage({ type: 'success', text: 'Valores restablecidos a predeterminados. Presioná "Guardar Cambios" para confirmar.' })
+    }
+  }
+
+  const handleSaveMayorista = async () => {
+    setSavingMayorista(true)
+    setStatusMessage(null)
+    try {
+      const res = await fetch('/api/descuentos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reglas: reglasMayorista }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setStatusMessage({ type: 'success', text: '¡Escalas de descuento mayorista guardadas en Supabase con éxito!' })
+      } else {
+        setStatusMessage({ type: 'error', text: data.error || 'Error al guardar escalas.' })
+      }
+    } catch {
+      setStatusMessage({ type: 'error', text: 'Error de red al guardar las escalas.' })
+    } finally {
+      setSavingMayorista(false)
+      setTimeout(() => setStatusMessage(null), 5000)
     }
   }
 
@@ -210,6 +261,19 @@ export default function AdminConfiguracionPage() {
         >
           <CreditCard className="size-4" />
           <span>Mercado Pago</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('mayorista')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition ${
+            activeTab === 'mayorista'
+              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+              : 'bg-neutral-900/60 border border-transparent text-neutral-400 hover:text-white'
+          }`}
+        >
+          <Percent className="size-4" />
+          <span>Precios Mayoristas</span>
         </button>
       </div>
 
@@ -586,6 +650,162 @@ export default function AdminConfiguracionPage() {
                   También podés configurar estas claves en las variables de entorno de Vercel como MERCADO_PAGO_ACCESS_TOKEN.
                 </span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* PESTAÑA: Precios y Descuentos por Mayor (Supabase) */}
+        {activeTab === 'mayorista' && (
+          <div className="rounded-2xl border border-neutral-800 bg-[#0d0d0d] p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-heading font-black uppercase text-white tracking-wide flex items-center gap-2">
+                  <Percent className="size-4 text-emerald-400" />
+                  <span>Escalas de Descuento por Cantidad de Pares (Mayorista)</span>
+                </h2>
+                <p className="text-xs text-neutral-400 mt-1">
+                  Configurá el porcentaje de descuento automático según la cantidad total de pares en el carrito.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReglasMayorista([
+                      ...reglasMayorista,
+                      {
+                        nombre: `Escala ${reglasMayorista.length + 1}`,
+                        cantidad_minima: 20,
+                        cantidad_maxima: null,
+                        valor_descuento: 35,
+                      },
+                    ])
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-neutral-200 text-xs font-bold uppercase tracking-wider hover:text-white transition"
+                >
+                  <Plus className="size-3.5" />
+                  <span>Agregar Escala</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveMayorista}
+                  disabled={savingMayorista}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                >
+                  {savingMayorista ? (
+                    <span className="size-3.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
+                  ) : (
+                    <Save className="size-3.5" />
+                  )}
+                  <span>Guardar en Supabase</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {reglasMayorista.map((regla, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-xl border border-neutral-800/80 bg-neutral-900/50 flex flex-col md:flex-row md:items-center gap-4 justify-between"
+                >
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="sm:col-span-1">
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-neutral-500 mb-1">
+                        Etiqueta / Nombre
+                      </label>
+                      <input
+                        type="text"
+                        value={regla.nombre}
+                        onChange={(e) => {
+                          const updated = [...reglasMayorista]
+                          updated[idx].nombre = e.target.value
+                          setReglasMayorista(updated)
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-neutral-500 mb-1">
+                        Pares Mínimos
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={regla.cantidad_minima}
+                        onChange={(e) => {
+                          const updated = [...reglasMayorista]
+                          updated[idx].cantidad_minima = parseInt(e.target.value) || 1
+                          setReglasMayorista(updated)
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-neutral-500 mb-1">
+                        Pares Máximos (vacío = sin límite)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={regla.cantidad_maxima ?? ''}
+                        placeholder="Sin límite (+)"
+                        onChange={(e) => {
+                          const updated = [...reglasMayorista]
+                          const val = e.target.value.trim()
+                          updated[idx].cantidad_maxima = val ? parseInt(val) : null
+                          setReglasMayorista(updated)
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-neutral-500 mb-1">
+                        % Descuento
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="90"
+                          value={regla.valor_descuento}
+                          onChange={(e) => {
+                            const updated = [...reglasMayorista]
+                            updated[idx].valor_descuento = parseInt(e.target.value) || 0
+                            setReglasMayorista(updated)
+                          }}
+                          className="w-full px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-emerald-400 font-bold focus:outline-none focus:border-emerald-500 font-mono pr-8"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-neutral-500">%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end shrink-0 pt-2 md:pt-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReglasMayorista(reglasMayorista.filter((_, i) => i !== idx))
+                      }}
+                      className="size-8 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition"
+                      title="Eliminar escala"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-950/60 text-xs text-neutral-400 space-y-1">
+              <p className="font-bold text-white flex items-center gap-1.5">
+                <Sparkles className="size-3.5 text-emerald-400" />
+                ¿Cómo calcula el checkout el precio mayorista?
+              </p>
+              <p>
+                El cliente puede mezclar cualquier modelo, talle y color (Campus 00s, Bad Bunny, etc.).
+                Si el carrito suma 8 pares o más, el sistema aplica automáticamente el 25% OFF sobre el total acumulado. Si suma 15 o más pares, aplica el 30% OFF. Si tiene un cupón con mayor descuento, siempre se le garantiza el mejor beneficio al cliente.
+              </p>
             </div>
           </div>
         )}

@@ -17,6 +17,9 @@ import {
   Lock,
   ArrowLeft,
   ChevronRight,
+  Percent,
+  TrendingUp,
+  Package,
 } from 'lucide-react'
 import { useOrder } from '@/lib/order-context'
 import { DEPARTAMENTOS_URUGUAY } from '@/lib/departamentos'
@@ -73,6 +76,16 @@ export default function CheckoutPage() {
   const [descuentoPorcentaje, setDescuentoPorcentaje] = useState(0)
   const [cuponError, setCuponError] = useState<string | null>(null)
 
+  // Descuentos mayoristas (auto por cantidad)
+  type ReglaMayorista = { id: string; nombre: string; cantidad_minima: number; cantidad_maxima: number | null; valor_descuento: number }
+  const [reglasMayorista, setReglasMayorista] = useState<ReglaMayorista[]>([
+    { id: '1', nombre: 'Precio Normal (1-7 pares)', cantidad_minima: 1, cantidad_maxima: 7, valor_descuento: 0 },
+    { id: '2', nombre: 'Mayorista (8-14 pares)', cantidad_minima: 8, cantidad_maxima: 14, valor_descuento: 25 },
+    { id: '3', nombre: 'Mayorista Grande (15+ pares)', cantidad_minima: 15, cantidad_maxima: null, valor_descuento: 30 },
+  ])
+  const [descuentoMayorista, setDescuentoMayorista] = useState(0)
+  const [reglaActiva, setReglaActiva] = useState<ReglaMayorista | null>(null)
+
   // Estado de submit
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -101,13 +114,45 @@ export default function CheckoutPage() {
     }
   }, [])
 
+  // Cargar reglas de descuento mayoristas desde Supabase
+  useEffect(() => {
+    fetch('/api/descuentos')
+      .then(r => r.json())
+      .then(data => { if (data.reglas?.length > 0) setReglasMayorista(data.reglas) })
+      .catch(() => {})
+  }, [])
+
+  // Auto-aplicar descuento mayorista según cantidad total de pares
+  useEffect(() => {
+    const cantidadTotal = items.reduce((acc, it) => acc + (it.cantidad || 1), 0)
+    const reglasOrdenadas = [...reglasMayorista].sort((a, b) => b.cantidad_minima - a.cantidad_minima)
+    let reglaEncontrada: ReglaMayorista | null = null
+    for (const regla of reglasOrdenadas) {
+      if (cantidadTotal >= regla.cantidad_minima && (regla.cantidad_maxima === null || cantidadTotal <= regla.cantidad_maxima)) {
+        reglaEncontrada = regla
+        break
+      }
+    }
+    setDescuentoMayorista(reglaEncontrada?.valor_descuento || 0)
+    setReglaActiva(reglaEncontrada?.valor_descuento ? reglaEncontrada : null)
+  }, [items, reglasMayorista])
+
   // Totales
   const subtotal = items.reduce((acc, it) => {
     return acc + parsePrecioUYU(it.producto.precio) * (it.cantidad || 1)
   }, 0)
+  const cantidadTotalPares = items.reduce((acc, it) => acc + (it.cantidad || 1), 0)
 
-  const montoDescuento = descuentoPorcentaje > 0 ? Math.round((subtotal * descuentoPorcentaje) / 100) : 0
+  // El descuento final es el MAYOR entre el cupón y el descuento mayorista automático
+  const descuentoFinal = Math.max(descuentoPorcentaje, descuentoMayorista)
+  const montoDescuento = descuentoFinal > 0 ? Math.round((subtotal * descuentoFinal) / 100) : 0
   const total = Math.max(0, subtotal - montoDescuento)
+
+  // Próxima regla para mostrar al cliente
+  const proximaRegla = reglasMayorista
+    .filter(r => r.cantidad_minima > cantidadTotalPares)
+    .sort((a, b) => a.cantidad_minima - b.cantidad_minima)[0] || null
+  const paresParaProxima = proximaRegla ? proximaRegla.cantidad_minima - cantidadTotalPares : 0
 
   const aplicarCupon = () => {
     const code = cupon.trim().toUpperCase()
@@ -205,15 +250,15 @@ export default function CheckoutPage() {
           metodoPago,
           direccionFacturacion: dirFacturacion,
           items,
-          cupon: cuponAplicado,
-          descuentoPorcentaje,
+          cupon: cuponAplicado || (reglaActiva ? `MAYORISTA${descuentoMayorista}PCT` : null),
+          descuentoPorcentaje: descuentoFinal,
         }),
       })
 
       const data = await res.json()
 
       if (!data.success) {
-        setErrorMsg(data.error || 'No se pudo crear el pedido.')
+        setErrorMsg(data.error || 'No se pudo procesar tu pedido. Intentá de nuevo.')
         setLoading(false)
         return
       }
@@ -222,9 +267,10 @@ export default function CheckoutPage() {
       clearOrder()
 
       if (data.metodoPago === 'mercadopago' && data.initPoint) {
-        window.location.href = data.initPoint
+        // Redirigir al checkout de Mercado Pago
+        window.location.assign(data.initPoint)
       } else if (data.redirectUrl) {
-        window.location.href = data.redirectUrl
+        window.location.assign(data.redirectUrl)
       } else {
         router.push(`/checkout/exito?order_id=${data.orderId}`)
       }
@@ -809,14 +855,69 @@ export default function CheckoutPage() {
                   })}
                 </div>
 
-                {/* Cupón de descuento */}
+                {/* Widget de Descuentos Mayoristas */}
+                <div className="pt-2 border-t border-neutral-800 space-y-2">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+                    <Package className="size-3.5" />
+                    <span>Precio por cantidad</span>
+                  </div>
+                  <div className="space-y-1">
+                    {reglasMayorista.map(regla => {
+                      const isActive = cantidadTotalPares >= regla.cantidad_minima &&
+                        (regla.cantidad_maxima === null || cantidadTotalPares <= regla.cantidad_maxima)
+                      const label = regla.cantidad_maxima
+                        ? `${regla.cantidad_minima}–${regla.cantidad_maxima} pares`
+                        : `${regla.cantidad_minima}+ pares`
+                      return (
+                        <div key={regla.id} className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition ${
+                          isActive
+                            ? 'bg-emerald-500/15 border border-emerald-500/40'
+                            : 'bg-neutral-950/60 border border-neutral-800/60'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            {isActive && <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                            <span className={isActive ? 'text-emerald-300 font-bold' : 'text-neutral-400'}>{label}</span>
+                          </div>
+                          <span className={`font-mono font-bold ${
+                            regla.valor_descuento > 0
+                              ? isActive ? 'text-emerald-400' : 'text-neutral-500'
+                              : 'text-neutral-500'
+                          }`}>
+                            {regla.valor_descuento > 0 ? `${regla.valor_descuento}% OFF` : 'Precio normal'}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {proximaRegla && proximaRegla.valor_descuento > 0 && (
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400">
+                      <TrendingUp className="size-3 shrink-0" />
+                      <span>Agregá <strong>{paresParaProxima} {paresParaProxima === 1 ? 'par' : 'pares'} más</strong> y obtenés {proximaRegla.valor_descuento}% OFF</span>
+                    </div>
+                  )}
+                  {reglaActiva && descuentoMayorista > 0 && (
+                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400">
+                      <Percent className="size-3.5 shrink-0" />
+                      <span><strong>{descuentoMayorista}% OFF mayorista</strong> aplicado automáticamente</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Cupón de descuento (opcional - solo si es mayor que el descuento mayorista) */}
                 <div className="pt-2 border-t border-neutral-800">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                    <Tag className="size-3.5" />
+                    <span>Código de descuento</span>
+                  </div>
                   {cuponAplicado ? (
                     <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs">
                       <Tag className="size-4 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <span className="font-bold font-mono">{cuponAplicado}</span>
-                        <span className="text-neutral-400 ml-1">({descuentoPorcentaje}% OFF aplicado)</span>
+                        <span className="text-neutral-400 ml-1">({descuentoPorcentaje}% OFF)</span>
+                        {descuentoMayorista >= descuentoPorcentaje && (
+                          <p className="text-amber-400/80 text-[10px] mt-0.5">El descuento mayorista es mayor y se aplica automáticamente</p>
+                        )}
                       </div>
                       <button
                         type="button"
@@ -864,9 +965,14 @@ export default function CheckoutPage() {
                     </span>
                   </div>
 
-                  {descuentoPorcentaje > 0 && (
+                  {descuentoFinal > 0 && (
                     <div className="flex justify-between text-emerald-400 font-semibold">
-                      <span>Descuento ({descuentoPorcentaje}%)</span>
+                      <span>
+                        {descuentoMayorista > descuentoPorcentaje
+                          ? `Descuento mayorista (${descuentoFinal}%)`
+                          : `Descuento cupón (${descuentoFinal}%)`
+                        }
+                      </span>
                       <span className="font-mono">-${montoDescuento.toLocaleString('es-UY')}</span>
                     </div>
                   )}
