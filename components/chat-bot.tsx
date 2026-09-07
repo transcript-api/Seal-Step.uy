@@ -85,7 +85,7 @@ const KNOWLEDGE_BASE: KnowledgeEntry[] = [
       'valor', 'costo', 'barato', 'cotizacion', 'cotizar'
     ],
     reply:
-      '🏷️ **Precios:**\nNuestros precios son directos de frontera para garantizarte la mejor relación calidad-precio de plaza. Podés tocar el botón de "Consultar precio" en cualquier modelo o escribirnos por WhatsApp con el modelo que te guste para darte el precio exacto con descuento.',
+      '🏷️ **Precios y Ofertas:**\nTodos los modelos tienen sus precios publicados en pesos uruguayos (UYU) en la web. Además contás con descuentos automáticos por mayor a partir de 8 pares (25% OFF) y pagos online con Mercado Pago o atención por WhatsApp.',
   },
   {
     id: 'ubicacion',
