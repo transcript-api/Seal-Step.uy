@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
@@ -19,7 +19,7 @@ import {
   MoreVertical,
   Zap,
   Bot,
-  Instagram,
+  AtSign,
   Filter,
   Download,
   Sparkles,
@@ -212,7 +212,7 @@ export default function AdminCrmPage() {
           <div className="divide-y divide-neutral-800/60">
             {filtrados.map(cliente => {
               const ec = estadoCfg[cliente.estado]
-              const CanalIcon = cliente.canal === 'WhatsApp' ? Phone : cliente.canal === 'Instagram' ? Instagram : Eye
+              const CanalIcon = cliente.canal === 'WhatsApp' ? Phone : cliente.canal === 'Instagram' ? AtSign : Eye
               const canalColor = cliente.canal === 'WhatsApp' ? 'text-emerald-400' : cliente.canal === 'Instagram' ? 'text-pink-400' : 'text-sky-400'
               return (
                 <div key={cliente.id} className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_48px] gap-y-2 md:gap-4 items-center px-5 py-4 hover:bg-neutral-800/20 transition group">
