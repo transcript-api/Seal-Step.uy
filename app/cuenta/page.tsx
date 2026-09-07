@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Shield,
 } from 'lucide-react'
+import { PhoneInput } from '@/components/phone-input'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -62,6 +63,7 @@ export default function CuentaPage() {
   // Form states
   const [formLogin, setFormLogin] = useState({ email: '', password: '' })
   const [formRegister, setFormRegister] = useState({ nombre: '', email: '', telefono: '', password: '' })
+  const [phoneValid, setPhoneValid] = useState(false)
 
   useEffect(() => {
     // Verificar sesión existente
@@ -128,6 +130,12 @@ export default function CuentaPage() {
 
     if (formRegister.password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.')
+      setLoading(false)
+      return
+    }
+
+    if (!phoneValid) {
+      setError('Por favor ingresá un número de teléfono real y válido para el país seleccionado.')
       setLoading(false)
       return
     }
@@ -491,21 +499,18 @@ export default function CuentaPage() {
 
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider" htmlFor="reg-tel">
-                      WhatsApp / Teléfono uruguayo
+                      WhatsApp / Teléfono Móvil
                     </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-500" />
-                      <input
-                        id="reg-tel"
-                        type="tel"
-                        autoComplete="tel"
-                        required
-                        placeholder="+598 9X XXX XXX"
-                        value={formRegister.telefono}
-                        onChange={e => setFormRegister(p => ({ ...p, telefono: e.target.value }))}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-800/60 py-3 pl-10 pr-4 text-sm text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition"
-                      />
-                    </div>
+                    <PhoneInput
+                      id="reg-tel"
+                      value={formRegister.telefono}
+                      onChange={(formattedValue, isValid) => {
+                        setFormRegister(p => ({ ...p, telefono: formattedValue }))
+                        setPhoneValid(isValid)
+                      }}
+                      required
+                      defaultCountryCode="UY"
+                    />
                   </div>
 
                   <div className="space-y-1">

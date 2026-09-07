@@ -30,10 +30,35 @@ export async function POST(request: Request) {
       )
     }
 
-    // Validación básica de email uruguayo
+    // Validación básica de email
     if (!email.includes('@') || !email.includes('.')) {
       return NextResponse.json(
         { success: false, error: 'El email no tiene un formato válido.' },
+        { status: 400 }
+      )
+    }
+
+    // Validación de teléfono real internacional con libphonenumber
+    let formattedPhone = telefono.trim()
+    try {
+      const { parsePhoneNumber } = await import('libphonenumber-js')
+      const parsed = parsePhoneNumber(formattedPhone, 'UY')
+      if (!parsed || !parsed.isValid()) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'El teléfono ingresado no es válido o no corresponde a una línea telefónica real asignada. Verificá los dígitos de tu país.',
+          },
+          { status: 400 }
+        )
+      }
+      formattedPhone = parsed.formatInternational()
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Formato de teléfono inválido. Por favor ingresá un número real con su prefijo internacional.',
+        },
         { status: 400 }
       )
     }
@@ -45,7 +70,7 @@ export async function POST(request: Request) {
       email_confirm: true, // confirmar automáticamente sin necesidad de email de confirmación
       user_metadata: {
         nombre,
-        telefono,
+        telefono: formattedPhone,
         rol: 'cliente',
       },
     })
@@ -75,7 +100,7 @@ export async function POST(request: Request) {
         id: userId, // usar el mismo UUID de Auth para consistencia
         nombre,
         email,
-        telefono,
+        telefono: formattedPhone,
         origen: 'registro_web',
         tags: ['nuevo_registro'],
         notas: `Registrado el ${new Date().toLocaleDateString('es-UY')}. Cupón: ${cupon}`,
