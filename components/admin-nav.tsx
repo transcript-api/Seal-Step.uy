@@ -14,11 +14,16 @@ import {
   ShieldCheck,
   Menu,
   X,
+  Sliders,
+  LogOut,
 } from 'lucide-react'
 
 export function AdminNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+  if (pathname === '/admin/login') {
+    return null
+  }
 
   const navItems = [
     { href: '/admin', label: 'Resumen General', icon: LayoutDashboard, exact: true },
@@ -26,7 +31,17 @@ export function AdminNav() {
     { href: '/admin/productos', label: 'Catálogo de Productos', icon: ShoppingBag },
     { href: '/admin/videos', label: 'Videos & Banners', icon: Video },
     { href: '/admin/crm', label: 'CRM & Clientes', icon: Users, badge: 'WhatsApp' },
+    { href: '/admin/configuracion', label: 'Ajustes de Tienda', icon: Sliders },
   ]
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth/logout', { method: 'POST' })
+      window.location.href = '/admin/login'
+    } catch {
+      window.location.href = '/admin/login'
+    }
+  }
 
   const isActive = (item: typeof navItems[0]) => {
     if (item.exact) return pathname === item.href
@@ -198,6 +213,15 @@ export function AdminNav() {
             <span>Ver Tienda Pública</span>
             <ExternalLink className="size-3.5" />
           </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-bold text-red-400 hover:text-red-300 transition"
+          >
+            <LogOut className="size-3.5" />
+            <span>Cerrar Sesión</span>
+          </button>
 
           <div className="flex items-center justify-between px-2 text-[11px] text-neutral-500 font-medium">
             <span className="flex items-center gap-1.5">

@@ -12,19 +12,23 @@ import { Contacto } from '@/components/sections/contacto'
 import Testimonials from '@/components/sections/testimonials'
 import { getProductos } from '@/lib/productos-db'
 import { getSiteVideos } from '@/lib/videos'
+import { getSiteConfig } from '@/lib/site-config'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function Page() {
-  const productos = await getProductos()
+  const [productos, siteConfig] = await Promise.all([
+    getProductos(),
+    getSiteConfig(),
+  ])
   const siteVideos = getSiteVideos()
 
   return (
     <>
       <SiteHeader />
       <main>
-        <Hero carouselSlides={siteVideos.heroCarousel} />
+        <Hero carouselSlides={siteVideos.heroCarousel} stats={siteConfig.statsHero} />
         <Marquee />
         <Productos initialProducts={productos} dropVideos={siteVideos.dropVideos} />
         <Beneficios />

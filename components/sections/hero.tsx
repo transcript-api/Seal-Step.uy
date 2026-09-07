@@ -7,14 +7,24 @@ import { CarouselStacked, type Slide } from '@/components/ui/carousel-07'
 import { CounterStat } from '@/components/counter-stat'
 import { ParallaxLayer } from '@/components/parallax-layer'
 
-const STATS_HERO = [
-  { value: 5000, prefix: '+', suffix: '', label: 'Pares enviados', icon: Truck },
-  { value: 19, prefix: '', suffix: '', label: 'Departamentos', icon: MapPin },
-  { value: 100, prefix: '', suffix: '%', label: 'Compra segura', icon: ShieldCheck },
-  { value: 50, prefix: '+', suffix: '', label: 'Revendedores', icon: TrendingUp },
-]
-
-export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
+export function Hero({
+  carouselSlides,
+  stats,
+}: {
+  carouselSlides?: Slide[]
+  stats?: {
+    paresEnviados: number
+    departamentos: number
+    compraSeguraPorcentaje: number
+    revendedoresActivos: number
+  }
+} = {}) {
+  const statsList = [
+    { value: stats?.paresEnviados ?? 5000, prefix: '+', suffix: '', label: 'Pares enviados', icon: Truck },
+    { value: stats?.departamentos ?? 19, prefix: '', suffix: '', label: 'Departamentos', icon: MapPin },
+    { value: stats?.compraSeguraPorcentaje ?? 100, prefix: '', suffix: '%', label: 'Compra segura', icon: ShieldCheck },
+    { value: stats?.revendedoresActivos ?? 50, prefix: '+', suffix: '', label: 'Revendedores', icon: TrendingUp },
+  ]
   return (
     <section
       id="top"
@@ -99,7 +109,7 @@ export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
           {/* Estadísticas animadas con CounterStat */}
           <Reveal delay={300}>
             <div className="mt-8 sm:mt-10 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 rounded-2xl border border-border/80 bg-card/40 p-3 sm:p-4 backdrop-blur-sm">
-              {STATS_HERO.map((s) => (
+              {statsList.map((s) => (
                 <div key={s.label} className="text-center sm:text-left">
                   <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-muted-foreground">
                     <s.icon className="size-3 text-emerald-400" />

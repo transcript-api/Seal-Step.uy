@@ -1,8 +1,8 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import Image from 'next/image'
-import { X, Trash2, Plus, Minus, ShoppingBag, Sparkles, Send, ArrowRight } from 'lucide-react'
+import { X, Trash2, Plus, Minus, ShoppingBag, Sparkles, Send, ArrowRight, CreditCard, AlertCircle } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { whatsappLink } from '@/lib/site'
 import { useOrder } from '@/lib/order-context'
@@ -10,6 +10,31 @@ import { useOrder } from '@/lib/order-context'
 export function OrderDrawer() {
   const { items, isDrawerOpen, setIsDrawerOpen, removeItem, updateQuantity, clearOrder, totalCount } =
     useOrder()
+
+  const [payingMp, setPayingMp] = useState(false)
+  const [mpError, setMpError] = useState<string | null>(null)
+
+  const handleMercadoPagoCheckout = async () => {
+    setPayingMp(true)
+    setMpError(null)
+    try {
+      const res = await fetch('/api/checkout/mercadopago', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+      })
+      const data = await res.json()
+      if (data.success && (data.initPoint || data.sandboxInitPoint)) {
+        window.location.href = data.initPoint || data.sandboxInitPoint
+      } else {
+        setMpError(data.error || 'No se pudo iniciar el checkout.')
+        setPayingMp(false)
+      }
+    } catch {
+      setMpError('Error al conectar con la pasarela de pagos.')
+      setPayingMp(false)
+    }
+  }
 
   const whatsappHref = useMemo(() => {
     if (items.length === 0) return ''
@@ -217,14 +242,40 @@ export function OrderDrawer() {
               </span>
             </div>
 
+            {mpError && (
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                <AlertCircle className="size-3.5 shrink-0" />
+                <span>{mpError}</span>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleMercadoPagoCheckout}
+              disabled={payingMp}
+              className="w-full flex items-center justify-center gap-2.5 rounded-full bg-[#009ee3] hover:bg-[#0089c7] py-3.5 px-6 font-heading text-sm font-bold text-white uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-sky-500/20 disabled:opacity-50"
+            >
+              {payingMp ? (
+                <span className="flex items-center gap-2">
+                  <span className="size-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  Iniciando Checkout Seguro...
+                </span>
+              ) : (
+                <>
+                  <CreditCard className="size-4" />
+                  <span>Pagar con Tarjeta / Abitab (Mercado Pago)</span>
+                </>
+              )}
+            </button>
+
             <a
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2.5 rounded-full bg-[#00e676] py-4 px-6 font-heading text-sm font-bold text-black uppercase tracking-wider transition-all duration-300 hover:bg-[#00c853] hover:scale-[1.02] shadow-lg shadow-emerald-500/20"
+              className="w-full flex items-center justify-center gap-2.5 rounded-full bg-[#00e676] py-3.5 px-6 font-heading text-sm font-bold text-black uppercase tracking-wider transition-all duration-300 hover:bg-[#00c853] hover:scale-[1.02] shadow-lg shadow-emerald-500/20"
             >
               <WhatsAppIcon className="size-5 fill-black" />
-              <span>Enviar Pedido a WhatsApp</span>
+              <span>Pedir por WhatsApp</span>
               <ArrowRight className="size-4" />
             </a>
 
