@@ -1,0 +1,49 @@
+{
+  "name": "Seal Step — Panel Admin",
+  "short_name": "SealStep",
+  "description": "Panel de administración de Seal Step — Tienda de championes en Uruguay",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "categories": ["business", "shopping"],
+  "lang": "es-UY",
+  "icons": [
+    {
+      "src": "/icon-dark-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Ver Tienda",
+      "short_name": "Tienda",
+      "description": "Ir a la tienda online",
+      "url": "/",
+      "icons": [{ "src": "/icon-dark-32x32.png", "sizes": "32x32" }]
+    },
+    {
+      "name": "Panel Admin",
+      "short_name": "Admin",
+      "description": "Abrir el panel de administración",
+      "url": "/admin",
+      "icons": [{ "src": "/icon-dark-32x32.png", "sizes": "32x32" }]
+    }
+  ]
+}

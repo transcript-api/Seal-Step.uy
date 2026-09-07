@@ -30,6 +30,12 @@ export const metadata: Metadata = {
     'Seal Step',
   ],
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Seal Step',
+  },
   openGraph: {
     title: 'Seal Step | Championes y calzado urbano en Uruguay',
     description:
@@ -100,12 +106,31 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd) }}
         />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Seal Step" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="mask-icon" href="/icon.svg" color="#10b981" />
       </head>
       <body className="font-sans antialiased">
         <ClientProviders>
           {children}
         </ClientProviders>
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.warn('SW registration failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   )

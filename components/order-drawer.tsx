@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
-import { X, Trash2, Plus, Minus, ShoppingBag, Sparkles, Send, ArrowRight, CreditCard, AlertCircle } from 'lucide-react'
+import { X, Trash2, Plus, Minus, ShoppingBag, Sparkles, Send, ArrowRight, CreditCard, AlertCircle, Tag } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { whatsappLink } from '@/lib/site'
 import { useOrder } from '@/lib/order-context'
@@ -13,6 +13,10 @@ export function OrderDrawer() {
 
   const [payingMp, setPayingMp] = useState(false)
   const [mpError, setMpError] = useState<string | null>(null)
+  const [cupon, setCupon] = useState('')
+  const [cuponAplicado, setCuponAplicado] = useState<string | null>(null)
+  const [cuponDescuento, setCuponDescuento] = useState(0) // porcentaje 0-100
+  const [cuponError, setCuponError] = useState<string | null>(null)
 
   const handleMercadoPagoCheckout = async () => {
     setPayingMp(true)
@@ -21,7 +25,7 @@ export function OrderDrawer() {
       const res = await fetch('/api/checkout/mercadopago', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
+        body: JSON.stringify({ items, cupon: cuponAplicado }),
       })
       const data = await res.json()
       if (data.success && (data.initPoint || data.sandboxInitPoint)) {
@@ -36,12 +40,43 @@ export function OrderDrawer() {
     }
   }
 
+  // Validar y aplicar cupón
+  const CUPONES_VALIDOS: Record<string, number> = {
+    'BIENVENIDA10': 10,
+    'SEALSTEP10': 10,
+    'DESCUENTO15': 15,
+  }
+
+  const aplicarCupon = () => {
+    const codigo = cupon.trim().toUpperCase()
+    if (!codigo) {
+      setCuponError('Ingresá un código de cupón.')
+      return
+    }
+    if (CUPONES_VALIDOS[codigo] !== undefined) {
+      setCuponAplicado(codigo)
+      setCuponDescuento(CUPONES_VALIDOS[codigo])
+      setCuponError(null)
+    } else {
+      setCuponAplicado(null)
+      setCuponDescuento(0)
+      setCuponError('Código de cupón inválido o expirado.')
+    }
+  }
+
+  const quitarCupon = () => {
+    setCupon('')
+    setCuponAplicado(null)
+    setCuponDescuento(0)
+    setCuponError(null)
+  }
+
   const whatsappHref = useMemo(() => {
     if (items.length === 0) return ''
 
     let text = `👋 ¡Hola Seal Step! Quisiera consultar disponibilidad y precio para el siguiente pedido:\n\n`
     items.forEach((item, index) => {
-      text += `👟 ${index + 1}. *${item.producto.nombre}*\n`
+      text += `💟 ${index + 1}. *${item.producto.nombre}*\n`
       text += `   • Talle: ${item.talle}\n`
       if (item.color) text += `   • Color: ${item.color}\n`
       text += `   • Cantidad: ${item.cantidad} par(es)\n\n`
@@ -51,9 +86,13 @@ export function OrderDrawer() {
       text += `🔥 *(Interesado en precio mayorista por ${totalCount} pares)*\n`
     }
 
+    if (cuponAplicado) {
+      text += `\n🎟️ *Cupón aplicado: ${cuponAplicado} (${cuponDescuento}% OFF)*\n`
+    }
+
     text += `¿Tienen stock y cuánto demora el envío? ¡Muchas gracias!`
     return whatsappLink(text)
-  }, [items, totalCount])
+  }, [items, totalCount, cuponAplicado, cuponDescuento])
 
   if (!isDrawerOpen) {
     // Floating Pill Trigger when bag has items
@@ -235,12 +274,51 @@ export function OrderDrawer() {
         {/* Footer Actions */}
         {items.length > 0 && (
           <div className="border-t border-neutral-800 bg-neutral-950 p-5 sm:px-6 space-y-3">
+            {/* Cupón de descuento */}
+            {cuponAplicado ? (
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
+                <Tag className="size-3.5 shrink-0" />
+                <span className="flex-1 font-bold">¡Cupón <strong>{cuponAplicado}</strong> aplicado: {cuponDescuento}% OFF!</span>
+                <button
+                  type="button"
+                  onClick={quitarCupon}
+                  className="text-neutral-500 hover:text-red-400 transition"
+                  title="Quitar cupón"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Código de cupón (ej: BIENVENIDA10)"
+                  value={cupon}
+                  onChange={e => { setCupon(e.target.value.toUpperCase()); setCuponError(null) }}
+                  onKeyDown={e => e.key === 'Enter' && aplicarCupon()}
+                  className="flex-1 rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none transition font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={aplicarCupon}
+                  className="px-3 py-2 rounded-xl bg-neutral-800 border border-neutral-700 text-xs font-bold text-white hover:bg-neutral-700 transition"
+                >
+                  Aplicar
+                </button>
+              </div>
+            )}
+            {cuponError && (
+              <p className="text-red-400 text-[11px] font-medium -mt-2">{cuponError}</p>
+            )}
+
+            {/* Contador de pares */}
             <div className="flex items-center justify-between text-xs text-neutral-400">
               <span>Total de pares a cotizar:</span>
               <span className="font-heading text-sm font-extrabold text-white">
                 {totalCount} {totalCount === 1 ? 'par' : 'pares'}
               </span>
             </div>
+
 
             {mpError && (
               <div className="flex items-center gap-2 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">

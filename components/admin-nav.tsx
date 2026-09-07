@@ -16,10 +16,14 @@ import {
   X,
   Sliders,
   LogOut,
+  Smartphone,
+  Download,
 } from 'lucide-react'
+import { InstallPwaModal } from '@/components/install-pwa-modal'
 
 export function AdminNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showInstallModal, setShowInstallModal] = useState(false)
   const pathname = usePathname()
   if (pathname === '/admin/login') {
     return null
@@ -204,6 +208,47 @@ export function AdminNav() {
 
         {/* Footer del Sidebar */}
         <div className="p-4 border-t border-neutral-800/80 space-y-3 shrink-0">
+          {/* Instalar App del Panel */}
+          <button
+            type="button"
+            onClick={() => setShowInstallModal(true)}
+            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition"
+          >
+            <Smartphone className="size-3.5" />
+            <span>📲 Instalar App del Panel</span>
+          </button>
+
+          {/* Descargar Backup de Datos */}
+          <div className="grid grid-cols-3 gap-1.5">
+            <a
+              href="/api/admin/export?format=json&tabla=all"
+              download
+              className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-[10px] font-bold text-neutral-400 hover:text-white transition text-center"
+              title="Descargar backup completo en JSON"
+            >
+              <Download className="size-3.5" />
+              JSON
+            </a>
+            <a
+              href="/api/admin/export?format=csv&tabla=clientes"
+              download
+              className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-[10px] font-bold text-neutral-400 hover:text-white transition text-center"
+              title="Descargar clientes en CSV para Excel"
+            >
+              <Download className="size-3.5" />
+              CSV Clientes
+            </a>
+            <a
+              href="/api/admin/export?format=csv&tabla=pedidos"
+              download
+              className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-[10px] font-bold text-neutral-400 hover:text-white transition text-center"
+              title="Descargar pedidos en CSV para Excel"
+            >
+              <Download className="size-3.5" />
+              CSV Pedidos
+            </a>
+          </div>
+
           <Link
             href="/"
             target="_blank"
@@ -240,6 +285,12 @@ export function AdminNav() {
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"
         />
       )}
+
+      {/* Modal de instalación PWA */}
+      <InstallPwaModal
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+      />
     </>
   )
 }

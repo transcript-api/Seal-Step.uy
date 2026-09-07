@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Menu, X, ChevronDown, ShoppingBag, Sparkles, Ruler } from 'lucide-react'
+import { Menu, X, ChevronDown, ShoppingBag, Sparkles, Ruler, User2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
@@ -136,6 +136,16 @@ export function SiteHeader() {
             <Sparkles className="size-3.5" />
             Test de Estilo
           </button>
+
+          {/* Mi Cuenta */}
+          <a
+            href="/cuenta"
+            className="flex items-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-900/60 px-3 py-1.5 text-xs font-bold text-neutral-300 hover:text-white hover:border-neutral-600 transition ml-1"
+            aria-label="Mi cuenta"
+          >
+            <User2 className="size-3.5" />
+            Mi Cuenta
+          </a>
         </nav>
 
         {/* Right side: Bag → Social → Menu */}
@@ -268,6 +278,16 @@ export function SiteHeader() {
                 Calculadora Talles
               </button>
             </div>
+
+            {/* Mi Cuenta — mobile */}
+            <a
+              href="/cuenta"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 py-3.5 border-b border-border/60 font-heading text-sm font-semibold tracking-wide uppercase"
+            >
+              <User2 className="size-4 text-neutral-400" />
+              Mi Cuenta
+            </a>
 
             {/* Social links in mobile menu */}
             <div className="mt-6 flex items-center gap-3">
