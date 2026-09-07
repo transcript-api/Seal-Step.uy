@@ -4,7 +4,6 @@ import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { Reveal } from '@/components/reveal'
 import { CarouselStacked, type Slide } from '@/components/ui/carousel-07'
-import { AshText } from '@/components/ash-text'
 import { CounterStat } from '@/components/counter-stat'
 import { ParallaxLayer } from '@/components/parallax-layer'
 
@@ -44,7 +43,7 @@ export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
         <div>
           <Reveal className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
             <MapPin className="size-3.5" />
-            <AshText as="span">Rivera, Uruguay — Envíos a todo el país</AshText>
+            <span>Rivera, Uruguay — Envíos a todo el país</span>
           </Reveal>
 
           <Reveal delay={80}>
@@ -59,21 +58,17 @@ export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
                 width={458}
                 height={97}
                 priority
-                className="animate-float-logo relative h-20 w-auto object-contain transition-transform duration-500 hover:scale-105 sm:h-28 lg:h-36 max-w-[90vw]"
+                className="relative h-20 w-auto object-contain transition-transform duration-500 hover:scale-105 sm:h-28 lg:h-36 max-w-[90vw]"
               />
             </div>
             <p className="mt-5 max-w-xl font-heading text-base sm:text-xl lg:text-2xl leading-snug font-semibold text-pretty">
-              <AshText as="span">
-                Championes urbanos e importados seleccionados para quienes buscan estilo y comodidad.
-              </AshText>
+              Championes urbanos e importados seleccionados para quienes buscan estilo y comodidad.
             </p>
           </Reveal>
 
           <Reveal delay={160}>
             <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">
-              <AshText as="span">
-                Modelos modernos, atención personalizada y entregas rápidas. Comprá desde cualquier parte del país o consultá por precios especiales para revendedores.
-              </AshText>
+              Modelos modernos, atención personalizada y entregas rápidas. Comprá desde cualquier parte del país o consultá por precios especiales para revendedores.
             </p>
           </Reveal>
 
@@ -88,7 +83,7 @@ export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
               className="inline-flex items-center justify-center gap-2.5 rounded-full bg-primary px-7 py-4 font-heading text-base font-bold text-primary-foreground shadow-lg shadow-black/40 transition-transform duration-300 hover:scale-[1.03]"
             >
               <WhatsAppIcon className="size-5" />
-              <AshText as="span">Comprar por WhatsApp</AshText>
+              <span>Comprar por WhatsApp</span>
             </a>
             <a
               href={WA_LINKS.catalogo}
@@ -96,7 +91,7 @@ export function Hero({ carouselSlides }: { carouselSlides?: Slide[] } = {}) {
               rel="noopener noreferrer"
               className="group inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-7 py-4 font-heading text-base font-bold transition-colors duration-300 hover:bg-secondary"
             >
-              <AshText as="span">Consultar catálogo</AshText>
+              <span>Consultar catálogo</span>
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
           </Reveal>
