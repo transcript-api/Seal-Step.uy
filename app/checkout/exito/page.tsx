@@ -13,8 +13,27 @@ function ExitoContent() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('order_id') || searchParams.get('external_reference') || 'SS-PEDIDO'
   const paymentId = searchParams.get('payment_id') || searchParams.get('collection_id')
+  const metodo = searchParams.get('metodo') || 'mercadopago'
 
-  const waMsg = `¡Hola Seal Step! Acabo de completar el pago de mi pedido #${orderId} a través de Mercado Pago (Pago ID: ${paymentId || 'confirmado'}). ¿Me confirman el despacho de los championes?`
+  const isTransfer = metodo === 'transferencia'
+  const isCash = metodo === 'efectivo'
+
+  let badge = 'Pago Aprobado'
+  let title = '¡Gracias por tu compra!'
+  let description = 'Tu pago fue procesado con éxito por Mercado Pago. Ya estamos preparando tus championes para el despacho.'
+  let waMsg = `¡Hola Seal Step! Acabo de completar el pago de mi pedido #${orderId} a través de Mercado Pago (Pago ID: ${paymentId || 'confirmado'}). ¿Me confirman el despacho de los championes?`
+
+  if (isTransfer) {
+    badge = 'Pedido Registrado • Pendiente de Transferencia'
+    title = '¡Pedido recibido con éxito!'
+    description = 'Por favor realiza la transferencia bancaria y envíanos el comprobante por WhatsApp para despachar tus championes hoy mismo.'
+    waMsg = `¡Hola Seal Step! Acabo de registrar el pedido #${orderId} con pago por Transferencia Bancaria. Les paso el comprobante para coordinar el envío.`
+  } else if (isCash) {
+    badge = 'Pedido Registrado • Pago Contra Entrega'
+    title = '¡Pedido confirmado!'
+    description = 'Prepararemos tu paquete. Abonarás en efectivo al momento de recibir tus championes en mano.'
+    waMsg = `¡Hola Seal Step! Acabo de registrar el pedido #${orderId} para pagar en efectivo al recibir. ¿Me confirman la entrega?`
+  }
 
   return (
     <div className="max-w-xl mx-auto text-center space-y-6 py-16 px-4">
@@ -24,13 +43,13 @@ function ExitoContent() {
 
       <div className="space-y-2">
         <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-          Pago Aprobado
+          {badge}
         </span>
         <h1 className="text-3xl sm:text-4xl font-heading font-black uppercase text-white tracking-tight">
-          ¡Gracias por tu compra!
+          {title}
         </h1>
         <p className="text-sm text-neutral-400">
-          Tu pago fue procesado con éxito por Mercado Pago. Ya estamos preparando tus championes para el despacho.
+          {description}
         </p>
       </div>
 
@@ -47,6 +66,23 @@ function ExitoContent() {
         )}
       </div>
 
+      {isTransfer && (
+        <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 text-left space-y-2.5 text-xs font-mono">
+          <p className="text-emerald-400 font-bold uppercase tracking-wider text-[11px]">Cuentas para transferir:</p>
+          <div className="p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+            <p className="text-white font-bold">Itaú: 4704307</p>
+            <p className="text-neutral-400 text-[11px]">Ignacio Duarte (Caja de Ahorros UYU)</p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+            <p className="text-white font-bold">Santander: 00000-1665111</p>
+            <p className="text-neutral-400 text-[11px]">Sucursal 26 - Tacuarembó • Moneda: UYU</p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+            <p className="text-white font-bold">Prex: 1158143</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
         <a
           href={whatsappLink(waMsg)}
@@ -55,7 +91,7 @@ function ExitoContent() {
           className="flex-1 flex items-center justify-center gap-2.5 rounded-full bg-[#00e676] py-3.5 px-6 font-heading text-sm font-bold text-black uppercase tracking-wider hover:bg-[#00c853] transition shadow-lg shadow-emerald-500/20"
         >
           <WhatsAppIcon className="size-4 fill-black" />
-          <span>Avisar por WhatsApp</span>
+          <span>{isTransfer ? 'Enviar comprobante por WhatsApp' : 'Avisar por WhatsApp'}</span>
         </a>
         <Link
           href="/#productos"

@@ -28,7 +28,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 )
 
-type Tab = 'login' | 'register'
+type Tab = 'login' | 'register' | 'forgot' | 'reset'
 
 interface ClienteSession {
   id: string
@@ -64,8 +64,18 @@ export default function CuentaPage() {
   const [formLogin, setFormLogin] = useState({ email: '', password: '' })
   const [formRegister, setFormRegister] = useState({ nombre: '', email: '', telefono: '', password: '' })
   const [phoneValid, setPhoneValid] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
 
   useEffect(() => {
+    // Detectar si viene de enlace de recuperación de contraseña
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('tab') === 'reset' || window.location.hash.includes('type=recovery')) {
+        setTab('reset')
+      }
+    }
+
     // Verificar sesión existente
     const session = parseClienteSession()
     if (session) {
@@ -169,6 +179,55 @@ export default function CuentaPage() {
       }
     } catch {
       setError('Error de conexión. Intentá de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setSuccess('¡Listo! Te enviamos las instrucciones a tu correo para restablecer tu contraseña. Revisá tu bandeja de entrada o spam.')
+      } else {
+        setError(data.error || 'No se pudo enviar el correo.')
+      }
+    } catch {
+      setError('Error de conexión. Intentá nuevamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newPassword.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+      if (updateError) {
+        setError('El enlace de recuperación venció o es inválido. Solicitá uno nuevo.')
+      } else {
+        setSuccess('¡Contraseña actualizada con éxito! Ya podés iniciar sesión con tu nueva clave.')
+        setTimeout(() => {
+          setTab('login')
+        }, 1500)
+      }
+    } catch {
+      setError('Error al actualizar la contraseña.')
     } finally {
       setLoading(false)
     }
@@ -320,61 +379,69 @@ export default function CuentaPage() {
           <p className="text-neutral-400 text-sm">
             {tab === 'login'
               ? 'Accedé a tu cuenta y gestioná tus pedidos.'
-              : 'Recibí tu cupón de bienvenida con 10% OFF.'}
+              : tab === 'register'
+              ? 'Recibí tu cupón de bienvenida con 10% OFF.'
+              : 'Te ayudamos a recuperar el acceso a tu cuenta.'}
           </p>
         </div>
 
         {/* Card principal */}
         <div className="rounded-3xl border border-neutral-800 bg-neutral-900/60 overflow-hidden">
-          {/* Pestañas */}
-          <div className="grid grid-cols-2 border-b border-neutral-800">
-            <button
-              onClick={() => { setTab('login'); setError(null); setSuccess(null) }}
-              className={`py-4 text-sm font-bold transition-colors ${
-                tab === 'login'
-                  ? 'bg-emerald-500/10 text-emerald-400 border-b-2 border-emerald-500'
-                  : 'text-neutral-500 hover:text-white'
-              }`}
-            >
-              Iniciar Sesión
-            </button>
-            <button
-              onClick={() => { setTab('register'); setError(null); setSuccess(null) }}
-              className={`py-4 text-sm font-bold transition-colors ${
-                tab === 'register'
-                  ? 'bg-emerald-500/10 text-emerald-400 border-b-2 border-emerald-500'
-                  : 'text-neutral-500 hover:text-white'
-              }`}
-            >
-              Crear Cuenta
-            </button>
-          </div>
+          {/* Tabs Selector */}
+          {tab !== 'forgot' && tab !== 'reset' && (
+            <div className="grid grid-cols-2 border-b border-neutral-800">
+              <button
+                onClick={() => { setTab('login'); setError(null); setSuccess(null) }}
+                className={`py-4 text-sm font-bold transition-colors ${
+                  tab === 'login'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-b-2 border-emerald-500'
+                    : 'text-neutral-500 hover:text-white'
+                }`}
+              >
+                Iniciar Sesión
+              </button>
+              <button
+                onClick={() => { setTab('register'); setError(null); setSuccess(null) }}
+                className={`py-4 text-sm font-bold transition-colors ${
+                  tab === 'register'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-b-2 border-emerald-500'
+                    : 'text-neutral-500 hover:text-white'
+                }`}
+              >
+                Crear Cuenta
+              </button>
+            </div>
+          )}
 
           <div className="p-6 space-y-5">
-            {/* Botón Google */}
-            <button
-              onClick={handleGoogleLogin}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-neutral-700 bg-neutral-800/60 text-sm font-bold text-white hover:bg-neutral-700 transition disabled:opacity-50"
-            >
-              {googleLoading ? (
-                <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <svg className="size-4" viewBox="0 0 24 24" fill="none">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-              )}
-              Continuar con Google
-            </button>
+            {/* Botón Google solo para login y registro */}
+            {(tab === 'login' || tab === 'register') && (
+              <>
+                <button
+                  onClick={handleGoogleLogin}
+                  disabled={googleLoading}
+                  className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-neutral-700 bg-neutral-800/60 text-sm font-bold text-white hover:bg-neutral-700 transition disabled:opacity-50"
+                >
+                  {googleLoading ? (
+                    <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <svg className="size-4" viewBox="0 0 24 24" fill="none">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                  )}
+                  Continuar con Google
+                </button>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-neutral-800" />
-              <span className="text-xs text-neutral-500 font-medium">o con email</span>
-              <div className="flex-1 h-px bg-neutral-800" />
-            </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-neutral-800" />
+                  <span className="text-xs text-neutral-500 font-medium">o con email</span>
+                  <div className="flex-1 h-px bg-neutral-800" />
+                </div>
+              </>
+            )}
 
             {/* Alertas */}
             {error && (
@@ -413,9 +480,18 @@ export default function CuentaPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider" htmlFor="login-pass">
-                    Contraseña
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider" htmlFor="login-pass">
+                      Contraseña
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => { setTab('forgot'); setError(null); setSuccess(null) }}
+                      className="text-xs text-neutral-400 hover:text-emerald-400 transition"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-500" />
                     <input
@@ -448,10 +524,101 @@ export default function CuentaPage() {
                   ) : null}
                   Iniciar sesión
                 </button>
+              </form>
+            )}
 
-                <p className="text-center text-xs text-neutral-500">
-                  ¿Sos el dueño de la tienda? Ingresá con tus credenciales de administrador y accedés directo al panel.
-                </p>
+            {/* Vista Recuperar Contraseña */}
+            {tab === 'forgot' && (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="text-left space-y-1">
+                  <h3 className="text-base font-bold text-white">Recuperá tu contraseña</h3>
+                  <p className="text-xs text-neutral-400">
+                    Ingresá el correo asociado a tu cuenta y te enviaremos un enlace seguro para restablecerla.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider" htmlFor="forgot-email">
+                    Correo electrónico
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-500" />
+                    <input
+                      id="forgot-email"
+                      type="email"
+                      required
+                      placeholder="tu@email.com"
+                      value={forgotEmail}
+                      onChange={e => setForgotEmail(e.target.value)}
+                      className="w-full rounded-xl border border-neutral-700 bg-neutral-800/60 py-3 pl-10 pr-4 text-sm text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider transition-all hover:scale-[1.02] disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                >
+                  {loading ? <span className="size-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : null}
+                  Enviar enlace de recuperación
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setTab('login'); setError(null); setSuccess(null) }}
+                  className="w-full text-center text-xs text-neutral-400 hover:text-white transition py-2 font-semibold"
+                >
+                  ← Volver a Iniciar Sesión
+                </button>
+              </form>
+            )}
+
+            {/* Vista Establecer Nueva Contraseña */}
+            {tab === 'reset' && (
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="text-left space-y-1">
+                  <h3 className="text-base font-bold text-white">Nueva contraseña</h3>
+                  <p className="text-xs text-neutral-400">
+                    Ingresá tu nueva clave para acceder a tu cuenta de Seal Step.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider" htmlFor="reset-new-pass">
+                    Nueva contraseña (mín. 6 caracteres)
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-500" />
+                    <input
+                      id="reset-new-pass"
+                      type="password"
+                      required
+                      minLength={6}
+                      placeholder="Nueva contraseña segura"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      className="w-full rounded-xl border border-neutral-700 bg-neutral-800/60 py-3 pl-10 pr-4 text-sm text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider transition-all hover:scale-[1.02] disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                >
+                  {loading ? <span className="size-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : null}
+                  Guardar nueva contraseña
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setTab('login'); setError(null); setSuccess(null) }}
+                  className="w-full text-center text-xs text-neutral-400 hover:text-white transition py-2 font-semibold"
+                >
+                  ← Volver a Iniciar Sesión
+                </button>
               </form>
             )}
 

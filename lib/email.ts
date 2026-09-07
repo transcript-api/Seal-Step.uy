@@ -191,3 +191,56 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<{ succes
     html,
   })
 }
+
+/**
+ * Plantilla de correo para recuperación de contraseña
+ */
+export function generateResetPasswordHtml(nombre: string, resetLink: string): string {
+  const firstName = nombre ? nombre.split(' ')[0] : 'Cliente'
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restablecer contraseña - Seal Step</title>
+</head>
+<body style="margin:0; padding:0; background:#0a0a0a; font-family:'Helvetica Neue', Arial, sans-serif; color:#ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a; padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:540px; background:#121212; border:1px solid #262626; border-radius:20px; padding:36px; text-align:center;">
+          <tr>
+            <td>
+              <div style="font-size:24px; font-weight:900; letter-spacing:-0.5px; color:#ffffff; margin-bottom:12px;">
+                SEAL STEP <span style="color:#10b981;">•</span>
+              </div>
+              <h2 style="color:#ffffff; font-size:22px; font-weight:800; margin:0 0 12px;">Recuperación de Contraseña</h2>
+              <p style="color:#a3a3a3; font-size:14px; line-height:1.6; margin:0 0 28px;">
+                Hola ${firstName}, recibimos una solicitud para restablecer la contraseña de tu cuenta en Seal Step. Haz clic en el siguiente botón seguro para crear una nueva clave:
+              </p>
+              <div style="margin:30px 0;">
+                <a href="${resetLink}" style="background:#10b981; color:#000000; font-weight:800; font-size:14px; text-transform:uppercase; letter-spacing:0.05em; padding:14px 32px; border-radius:100px; text-decoration:none; display:inline-block;">
+                  Restablecer mi Contraseña →
+                </a>
+              </div>
+              <p style="color:#737373; font-size:12px; line-height:1.5; margin:24px 0 0;">
+                Si tú no solicitaste este cambio, puedes ignorar este mensaje de forma segura. El enlace expirará en 1 hora.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+export async function sendResetPasswordEmail(email: string, nombre: string, resetLink: string): Promise<{ success: boolean; simulated?: boolean }> {
+  const html = generateResetPasswordHtml(nombre, resetLink)
+  return sendEmail({
+    to: email,
+    subject: '🔐 Restablece tu contraseña - Seal Step Uruguay',
+    html,
+  })
+}

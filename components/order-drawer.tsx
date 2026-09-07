@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
-import { X, Trash2, Plus, Minus, ShoppingBag, Sparkles, Send, ArrowRight, CreditCard, AlertCircle, Tag } from 'lucide-react'
+import Link from 'next/link'
+import { X, Trash2, Plus, Minus, ShoppingBag, Sparkles, Send, ArrowRight, CreditCard, AlertCircle, Tag, Shield } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { whatsappLink } from '@/lib/site'
 import { useOrder } from '@/lib/order-context'
@@ -327,34 +328,26 @@ export function OrderDrawer() {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={handleMercadoPagoCheckout}
-              disabled={payingMp}
-              className="w-full flex items-center justify-center gap-2.5 rounded-full bg-[#009ee3] hover:bg-[#0089c7] py-3.5 px-6 font-heading text-sm font-bold text-white uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-sky-500/20 disabled:opacity-50"
+            {/* Botón Principal: Checkout con datos de envío y pago */}
+            <Link
+              href="/checkout"
+              onClick={() => setIsDrawerOpen(false)}
+              className="w-full flex items-center justify-center gap-2.5 rounded-full bg-white hover:bg-neutral-100 py-3.5 px-6 font-heading text-sm font-black text-black uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] shadow-xl shadow-white/10"
             >
-              {payingMp ? (
-                <span className="flex items-center gap-2">
-                  <span className="size-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                  Iniciando Checkout Seguro...
-                </span>
-              ) : (
-                <>
-                  <CreditCard className="size-4" />
-                  <span>Pagar con Tarjeta / Abitab (Mercado Pago)</span>
-                </>
-              )}
-            </button>
+              <Shield className="size-4 text-emerald-600" />
+              <span>Iniciar Compra Segura</span>
+              <ArrowRight className="size-4" />
+            </Link>
 
+            {/* Alternativa: Pedir directo por WhatsApp */}
             <a
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2.5 rounded-full bg-[#00e676] py-3.5 px-6 font-heading text-sm font-bold text-black uppercase tracking-wider transition-all duration-300 hover:bg-[#00c853] hover:scale-[1.02] shadow-lg shadow-emerald-500/20"
+              className="w-full flex items-center justify-center gap-2 rounded-full bg-[#00e676]/15 hover:bg-[#00e676]/25 border border-[#00e676]/40 py-2.5 px-5 font-heading text-xs font-bold text-[#00e676] uppercase tracking-wider transition-all duration-300"
             >
-              <WhatsAppIcon className="size-5 fill-black" />
-              <span>Pedir por WhatsApp</span>
-              <ArrowRight className="size-4" />
+              <WhatsAppIcon className="size-4 fill-[#00e676]" />
+              <span>O coordinar por WhatsApp</span>
             </a>
 
             <div className="flex items-center justify-between pt-1">
