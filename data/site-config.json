@@ -23,10 +23,10 @@
     "promoBannerTexto": "Envíos a todo el país. Consultá por precios mayoristas para revendedores."
   },
   "mercadoPago": {
-    "habilitado": false,
+    "habilitado": true,
     "moneda": "UYU",
-    "publicKey": "",
-    "accessToken": "",
+    "publicKey": "APP_USR-cbbb83e1-f15b-49cb-a119-763abb61ad05",
+    "accessToken": "APP_USR-2670897500308607-090705-951c3ea25dc5fb4422762b86f8a5c33e-1798352116",
     "cuotasSinInteres": true
   }
 }

@@ -7,12 +7,15 @@ export async function GET() {
   const siteConfig = await getSiteConfig()
   const accessToken =
     process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim() ||
+    process.env.MERCADOPAGO_ACCESS_TOKEN?.trim() ||
     siteConfig.mercadoPago?.accessToken?.trim()
 
   if (!accessToken) {
     return NextResponse.json({
       ok: false,
+      version: 'v2-checking',
       error: 'MERCADO_PAGO_ACCESS_TOKEN no configurado',
+      siteConfigMP: Boolean(siteConfig.mercadoPago?.accessToken),
       envKeys: Object.keys(process.env).filter(k => k.includes('MERCADO')),
     })
   }
