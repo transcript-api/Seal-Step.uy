@@ -1,0 +1,32 @@
+{
+  "whatsappNumber": "59895843091",
+  "whatsappDisplay": "+598 95 843 091",
+  "whatsappMensajeBienvenida": "¡Hola Seal Step! Quiero consultar modelos, talles y precios de championes.",
+  "emailContacto": "contacto@sealstep.uy",
+  "ciudadBase": "Rivera y Montevideo, Uruguay",
+  "horarioAtencion": "Lunes a Sábado de 09:00 a 20:00 hs",
+  "statsHero": {
+    "paresEnviados": 5200,
+    "departamentos": 19,
+    "compraSeguraPorcentaje": 100,
+    "revendedoresActivos": 55
+  },
+  "envios": {
+    "plazoEstimado": "24 a 72 hs",
+    "costoEnvioBaseUYU": 250,
+    "envioGratisMinimoUYU": 3500,
+    "transportistas": "DAC, Correo Uruguayo, DePunta, Mirtrans, UES"
+  },
+  "anuncios": {
+    "cintilloMarquesina": "ENTREGAS EN 24 A 72 HS · CALIDAD-PRECIO · COMPRA SEGURA · ENVÍOS A TODO URUGUAY · VENTAS POR MAYOR · ATENCIÓN PERSONALIZADA",
+    "promoActiva": true,
+    "promoBannerTexto": "Envíos a todo el país. Consultá por precios mayoristas para revendedores."
+  },
+  "mercadoPago": {
+    "habilitado": false,
+    "moneda": "UYU",
+    "publicKey": "",
+    "accessToken": "",
+    "cuotasSinInteres": true
+  }
+}

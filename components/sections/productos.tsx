@@ -19,6 +19,7 @@ import { PRODUCTOS, MARCAS, getProductosPreviewHome, type Producto } from '@/lib
 import { Reveal } from '@/components/reveal'
 import { useOrder } from '@/lib/order-context'
 import { AshText } from '@/components/ash-text'
+import { LazyVideo } from '@/components/lazy-video'
 
 const ALL_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43']
 
@@ -301,13 +302,9 @@ export function Productos({
                       <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-950">
                         <Link href={`/producto/${drop.slug}`} className="block w-full h-full">
                           {drop.videoSrc ? (
-                            <video
+                            <LazyVideo
                               src={drop.videoSrc}
                               poster={drop.customImage ?? drop.imagenes[0]?.src}
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
                               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-108"
                             />
                           ) : (

@@ -24,18 +24,38 @@ export async function POST(req: Request) {
       )
     }
 
-    // Si Supabase está disponible, intentamos persistir los bloques de configuración
+    // 1. Guardar siempre en archivo local data/site-config.json
+    try {
+      const fs = await import('fs')
+      const path = await import('path')
+      const filePath = path.join(process.cwd(), 'data', 'site-config.json')
+      let current: Record<string, unknown> = {}
+      if (fs.existsSync(filePath)) {
+        current = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      }
+      const updatedLocal = { ...current, ...body }
+      fs.writeFileSync(filePath, JSON.stringify(updatedLocal, null, 2), 'utf-8')
+    } catch (fsErr) {
+      console.warn('Aviso al escribir en data/site-config.json:', fsErr)
+    }
+
+    // 2. Si Supabase está disponible, persistir con clave de servicio en site_config
     if (isSupabaseConfigured()) {
-      const keysToSave = Object.entries(body)
-      for (const [clave, valor] of keysToSave) {
-        try {
-          await supabase.from('site_config').upsert(
+      try {
+        const { createClient } = await import('@supabase/supabase-js')
+        const adminClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+          process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        )
+        const keysToSave = Object.entries(body)
+        for (const [clave, valor] of keysToSave) {
+          await adminClient.from('site_config').upsert(
             { clave, valor, updated_at: new Date().toISOString() },
             { onConflict: 'clave' }
           )
-        } catch (dbErr) {
-          console.warn(`Aviso al guardar clave ${clave} en site_config:`, dbErr)
         }
+      } catch (dbErr) {
+        console.warn('Aviso al guardar en site_config de Supabase:', dbErr)
       }
     }
 

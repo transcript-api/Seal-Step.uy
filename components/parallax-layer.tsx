@@ -21,7 +21,6 @@ export function ParallaxLayer({
   style = {},
 }: ParallaxLayerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [offsetY, setOffsetY] = useState(0)
 
   useEffect(() => {
     if (
@@ -39,14 +38,12 @@ export function ParallaxLayer({
       const rect = containerRef.current.getBoundingClientRect()
       const viewportHeight = window.innerHeight
 
-      // Cuando está en el rango visible
       if (rect.bottom >= -100 && rect.top <= viewportHeight + 100) {
         const elementCenter = rect.top + rect.height / 2
         const viewportCenter = viewportHeight / 2
         const distanceFromCenter = elementCenter - viewportCenter
-
         const calculatedOffset = Math.round(distanceFromCenter * speed)
-        setOffsetY(calculatedOffset)
+        containerRef.current.style.transform = `translate3d(0, ${calculatedOffset}px, 0)`
       }
     }
 
@@ -72,7 +69,6 @@ export function ParallaxLayer({
       className={className}
       style={{
         ...style,
-        transform: `translate3d(0, ${offsetY}px, 0)`,
         willChange: 'transform',
       }}
     >

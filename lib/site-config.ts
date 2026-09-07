@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import localFallbackJson from '@/data/site-config.json'
 
 export interface SiteConfig {
   // Información de contacto y WhatsApp
@@ -90,14 +91,30 @@ const CACHE_TTL_MS = 60 * 1000 // 1 minuto
  * Prioridad 2 (Respaldo Seguro): Si Supabase falla o no está configurada la tabla,
  * retorna inmediatamente la configuración por defecto sin romper la página.
  */
+function readLocalFallbackConfig(): Partial<SiteConfig> {
+  return (localFallbackJson as Partial<SiteConfig>) || {}
+}
+
 export async function getSiteConfig(): Promise<SiteConfig> {
   const now = Date.now()
   if (cachedConfig && now < cacheExpiry) {
     return cachedConfig
   }
 
+  const localFallback = readLocalFallbackConfig()
+  const baseConfig: SiteConfig = {
+    ...DEFAULT_SITE_CONFIG,
+    ...localFallback,
+    statsHero: { ...DEFAULT_SITE_CONFIG.statsHero, ...(localFallback.statsHero || {}) },
+    envios: { ...DEFAULT_SITE_CONFIG.envios, ...(localFallback.envios || {}) },
+    anuncios: { ...DEFAULT_SITE_CONFIG.anuncios, ...(localFallback.anuncios || {}) },
+    mercadoPago: { ...DEFAULT_SITE_CONFIG.mercadoPago, ...(localFallback.mercadoPago || {}) },
+  }
+
   if (!isSupabaseConfigured()) {
-    return DEFAULT_SITE_CONFIG
+    cachedConfig = baseConfig
+    cacheExpiry = now + CACHE_TTL_MS
+    return baseConfig
   }
 
   try {
@@ -106,7 +123,9 @@ export async function getSiteConfig(): Promise<SiteConfig> {
       .select('clave, valor')
 
     if (error || !data || data.length === 0) {
-      return DEFAULT_SITE_CONFIG
+      cachedConfig = baseConfig
+      cacheExpiry = now + CACHE_TTL_MS
+      return baseConfig
     }
 
     // Convertir filas clave-valor a objeto SiteConfig

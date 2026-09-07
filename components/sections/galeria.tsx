@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Play, Pause, Sparkles } from 'lucide-react'
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
@@ -45,7 +45,30 @@ const FALLBACK_VIDEOS: ReelItem[] = [
 
 function VideoCard({ video, index }: { video: ReelItem; index: number }) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            el.play().catch(() => {})
+            setIsPlaying(true)
+          } else {
+            el.pause()
+            setIsPlaying(false)
+          }
+        })
+      },
+      { threshold: 0.2 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const togglePlay = () => {
     if (!videoRef.current) return
@@ -53,7 +76,7 @@ function VideoCard({ video, index }: { video: ReelItem; index: number }) {
       videoRef.current.pause()
       setIsPlaying(false)
     } else {
-      videoRef.current.play()
+      videoRef.current.play().catch(() => {})
       setIsPlaying(true)
     }
   }
@@ -69,10 +92,10 @@ function VideoCard({ video, index }: { video: ReelItem; index: number }) {
           <video
             ref={videoRef}
             src={video.src}
-            autoPlay
             loop
             muted
             playsInline
+            preload="metadata"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
 

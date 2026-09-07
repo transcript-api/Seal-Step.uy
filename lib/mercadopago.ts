@@ -1,3 +1,5 @@
+import { getSiteConfig } from '@/lib/site-config'
+
 /**
  * Integración oficial con Mercado Pago Uruguay (UYU).
  * Documentación API: https://www.mercadopago.com.uy/developers/es/reference/preferences/_checkout_preferences/post
@@ -52,7 +54,9 @@ export async function createPreference({
   orderId,
   baseUrl,
 }: CreatePreferenceParams): Promise<PreferenceResult> {
-  const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim()
+  const siteConfig = await getSiteConfig()
+  const accessToken =
+    process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim() || siteConfig.mercadoPago?.accessToken?.trim()
 
   if (!accessToken) {
     console.warn('⚠️ MERCADO_PAGO_ACCESS_TOKEN no configurado en el servidor. Modo simulación activo.')
