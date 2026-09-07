@@ -97,9 +97,9 @@ export default function SlidesPage() {
                         </div>
 
                         <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 pt-2 border-t border-neutral-800/60">
-                          <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-white">
-                            Consultar precio
-                            <ArrowUpRight className="size-3.5 sm:size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                          <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-emerald-400">
+                            {producto.precio ?? 'Consultar precio'}
+                            <ArrowUpRight className="size-3.5 sm:size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-white" />
                           </span>
                           <span className="self-start sm:self-auto rounded-full bg-neutral-900 px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-emerald-400 border border-emerald-500/20">
                             ✓ ENCARGUE
