@@ -10,11 +10,22 @@ export async function GET() {
     process.env.MERCADOPAGO_ACCESS_TOKEN?.trim() ||
     siteConfig.mercadoPago?.accessToken?.trim()
 
+  const supabaseCheck = {
+    hasUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    urlVal: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 20),
+    hasServiceKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    serviceKeyLen: process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0,
+    serviceKeyStart: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 12),
+    hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    anonKeyLen: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length || 0,
+  }
+
   if (!accessToken) {
     return NextResponse.json({
       ok: false,
-      version: 'v2-checking',
+      version: 'v3-debug',
       error: 'MERCADO_PAGO_ACCESS_TOKEN no configurado',
+      supabaseCheck,
       siteConfigMP: Boolean(siteConfig.mercadoPago?.accessToken),
       envKeys: Object.keys(process.env).filter(k => k.includes('MERCADO')),
     })
@@ -59,6 +70,7 @@ export async function GET() {
       tokenUsed: `${accessToken.substring(0, 20)}...`,
       initPoint: body.init_point,
       preferenceId: body.id,
+      supabaseCheck,
       error: res.ok ? null : body,
     })
   } catch (err) {
