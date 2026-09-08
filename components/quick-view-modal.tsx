@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { X, Check, ArrowRight, Sparkles, ShieldCheck, Truck, Plus, Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { X, Check, ArrowRight, Sparkles, ShieldCheck, Truck, Plus, Eye, Zap, ShoppingBag } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { whatsappLink } from '@/lib/site'
 import { useOrder } from '@/lib/order-context'
 
 export function QuickViewModal() {
-  const { quickViewProduct, setQuickViewProduct, addItem, setIsSizeGuideOpen } = useOrder()
+  const router = useRouter()
+  const { quickViewProduct, setQuickViewProduct, addItem, setIsDrawerOpen, setIsSizeGuideOpen } = useOrder()
   const [selectedTalle, setSelectedTalle] = useState<string>('')
   const [selectedImageIdx, setSelectedImageIdx] = useState(0)
   const [justAdded, setJustAdded] = useState(false)
@@ -42,7 +44,14 @@ export function QuickViewModal() {
   const handleAdd = () => {
     addItem(quickViewProduct, selectedTalle || quickViewProduct.talles[0] || 'A coordinar')
     setJustAdded(true)
+    setIsDrawerOpen(true)
     setTimeout(() => setJustAdded(false), 2000)
+  }
+
+  const handleBuyNow = () => {
+    addItem(quickViewProduct, selectedTalle || quickViewProduct.talles[0] || 'A coordinar')
+    setQuickViewProduct(null)
+    router.push('/checkout')
   }
 
   return (
@@ -133,8 +142,16 @@ export function QuickViewModal() {
               )}
             </div>
 
-            {/* Stock / Availability Status */}
-            <div className="flex items-center gap-3">
+            {/* Price & Availability */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <div>
+                <span className="font-heading text-2xl sm:text-3xl font-black text-emerald-400">
+                  {quickViewProduct.precio ?? 'Consultar precio'}
+                </span>
+                <span className="block text-[10px] font-bold tracking-wider text-neutral-400 uppercase">
+                  Pesos Uruguayos (UYU)
+                </span>
+              </div>
               <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Check className="size-3.5" /> Disponible por encargue (24 a 72 hs)
               </span>
@@ -196,22 +213,31 @@ export function QuickViewModal() {
               </div>
             </div>
 
-            {/* Actions: Add to Order Bag & Direct WhatsApp */}
+            {/* Actions: Comprar Ahora, Agregar al Carrito & WhatsApp */}
             <div className="space-y-2.5 pt-2">
               <button
                 type="button"
+                onClick={handleBuyNow}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 px-6 font-heading text-sm font-black text-black uppercase tracking-wider transition-all hover:bg-emerald-400 active:scale-[0.99] shadow-lg shadow-emerald-500/20 cursor-pointer"
+              >
+                <Zap className="size-4 fill-black" />
+                <span>COMPRAR AHORA (MERCADO PAGO / ENVIOS)</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleAdd}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-white py-3.5 px-6 font-heading text-sm font-bold text-black uppercase tracking-wider transition-all hover:bg-neutral-200 active:scale-[0.99] shadow-lg shadow-white/10"
+                className="w-full flex items-center justify-center gap-2 rounded-2xl border border-neutral-700 bg-neutral-900/90 py-3 px-6 font-heading text-xs font-bold text-white uppercase tracking-wider transition-all hover:bg-neutral-800 hover:border-neutral-500 cursor-pointer"
               >
                 {justAdded ? (
                   <>
-                    <Check className="size-4 text-emerald-600" />
-                    ¡Agregado a tu lista de consulta!
+                    <Check className="size-4 text-emerald-400" />
+                    <span>✓ ¡AGREGADO AL CARRITO!</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="size-4" />
-                    Agregar a mi lista de consulta (Talle {selectedTalle || quickViewProduct.talles[0]})
+                    <ShoppingBag className="size-4" />
+                    <span>+ AGREGAR AL CARRITO (Talle {selectedTalle || quickViewProduct.talles[0]})</span>
                   </>
                 )}
               </button>

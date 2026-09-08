@@ -3,7 +3,8 @@
 import { useMemo, useState, TouchEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CreditCard, Truck, ShieldCheck } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { CreditCard, Truck, ShieldCheck, ShoppingBag, Zap, Check } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { whatsappLink, WA_LINKS } from '@/lib/site'
 import type { Producto } from '@/lib/productos'
@@ -14,7 +15,8 @@ type ProductoDetalleProps = {
 }
 
 export function ProductoDetalle({ producto }: ProductoDetalleProps) {
-  const { addItem, setIsSizeGuideOpen } = useOrder()
+  const router = useRouter()
+  const { addItem, setIsDrawerOpen, setIsSizeGuideOpen } = useOrder()
   const [addedBag, setAddedBag] = useState(false)
   const [selectedTalle, setSelectedTalle] = useState(producto.talles[0] ?? '')
   const [selectedColor, setSelectedColor] = useState(
@@ -294,49 +296,58 @@ export function ProductoDetalle({ producto }: ProductoDetalleProps) {
 
             {/* Botones Interactivos de Acción */}
             <div className="pt-4 space-y-3">
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full rounded-full bg-white px-8 py-4 text-center font-bold text-black uppercase tracking-wider text-sm sm:text-base flex items-center justify-center gap-3 transition-all duration-200 hover:bg-neutral-200 shadow-xl group"
+              {/* Botón Principal: Comprar Directo con Mercado Pago o Envíos */}
+              <button
+                type="button"
+                onClick={() => {
+                  addItem(producto, selectedTalle || producto.talles[0] || '', selectedColor)
+                  router.push('/checkout')
+                }}
+                className="w-full rounded-full bg-emerald-500 px-8 py-4 text-center font-heading text-sm sm:text-base font-black text-black uppercase tracking-wider flex items-center justify-center gap-3 transition-all duration-200 hover:bg-emerald-400 active:scale-[0.99] shadow-xl shadow-emerald-500/20 group cursor-pointer"
               >
-                <span>CONSULTAR POR WHATSAPP</span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-white group-hover:scale-105 transition-transform">
-                  <WhatsAppIcon className="size-4 fill-white" />
-                </span>
-              </a>
+                <Zap className="size-5 fill-black" />
+                <span>COMPRAR AHORA (MERCADO PAGO / ENVIOS)</span>
+              </button>
 
+              {/* Botón Secundario: Agregar al Carrito */}
               <button
                 type="button"
                 onClick={() => {
                   addItem(producto, selectedTalle || producto.talles[0] || '', selectedColor)
                   setAddedBag(true)
+                  setIsDrawerOpen(true)
                   setTimeout(() => setAddedBag(false), 2000)
                 }}
-                className="w-full rounded-full border border-neutral-700 bg-neutral-900/90 px-8 py-3.5 text-center font-heading text-xs sm:text-sm font-bold uppercase tracking-wider text-white transition-all duration-200 hover:bg-neutral-800 hover:border-neutral-500"
+                className="w-full rounded-full border border-neutral-700 bg-neutral-900/90 px-8 py-3.5 text-center font-heading text-xs sm:text-sm font-bold uppercase tracking-wider text-white transition-all duration-200 hover:bg-neutral-800 hover:border-neutral-500 flex items-center justify-center gap-2.5 cursor-pointer"
               >
-                {addedBag ? '✓ ¡AGREGADO A TU LISTA DE CONSULTA!' : '+ AGREGAR A MI LISTA DE PEDIDO'}
+                {addedBag ? (
+                  <>
+                    <Check className="size-4 text-emerald-400" />
+                    <span>✓ ¡AGREGADO AL CARRITO!</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="size-4" />
+                    <span>+ AGREGAR AL CARRITO</span>
+                  </>
+                )}
               </button>
+
+              {/* Botón Terciario: Consultar por WhatsApp */}
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-8 py-3 text-center font-medium text-neutral-300 hover:text-white uppercase tracking-wider text-xs flex items-center justify-center gap-2.5 transition-all duration-200 hover:bg-neutral-900 group"
+              >
+                <span>¿DUDAS O PREGUNTAS? CONSULTAR POR WHATSAPP</span>
+                <WhatsAppIcon className="size-3.5 fill-[#00e676]" />
+              </a>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Widget flotante inferior derecho: Escribinos */}
-      <a
-        href={WA_LINKS.general}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Escribir por WhatsApp a Seal Step"
-        className="fixed right-6 bottom-6 z-50 flex items-center gap-2.5 rounded-full border border-neutral-800 bg-neutral-950/90 px-4 py-2.5 text-white shadow-2xl backdrop-blur transition-transform duration-300 hover:scale-105"
-      >
-        <span className="font-heading text-xs font-bold tracking-wide text-white">
-          Escribinos
-        </span>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#00e676] text-black">
-          <WhatsAppIcon className="size-4 fill-black" />
-        </span>
-      </a>
     </div>
   )
 }

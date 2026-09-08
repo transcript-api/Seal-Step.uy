@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+function getSupabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || 'https://ecxueywwkblpihggyvpx.supabase.co'
+  const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || ''
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseKey)
+  const isGoodServiceKey = rawKey && !rawKey.startsWith('SUPABASE_') && rawKey.length > 28
+  const key = isGoodServiceKey ? rawKey : anonKey
+
+  return createClient(url, key)
+}
 
 export async function POST(request: Request) {
   try {
@@ -42,6 +48,7 @@ export async function POST(request: Request) {
     }
 
     // 1. Guardar en tabla productos (Upsert por slug)
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: prodData, error: prodErr } = await supabaseAdmin
       .from('productos')
       .upsert(

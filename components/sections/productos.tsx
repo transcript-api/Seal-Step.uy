@@ -354,7 +354,7 @@ export function Productos({
                                 ? 'bg-emerald-500 text-black scale-110'
                                 : 'bg-white/15 hover:bg-white text-white hover:text-black border border-white/30 hover:scale-105'
                             }`}
-                            title="Agregar a mi lista de consulta"
+                            title="Agregar al carrito"
                           >
                             {isJustAdded ? (
                               <Check className="size-5" />

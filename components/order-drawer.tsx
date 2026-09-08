@@ -96,32 +96,7 @@ export function OrderDrawer() {
   }, [items, totalCount, cuponAplicado, cuponDescuento])
 
   if (!isDrawerOpen) {
-    // Floating Pill Trigger when bag has items
-    return totalCount > 0 ? (
-      <div className="fixed bottom-5 left-4 sm:bottom-6 sm:left-6 z-50">
-        <button
-          type="button"
-          onClick={() => setIsDrawerOpen(true)}
-          aria-label={`Ver lista de consulta con ${totalCount} pares seleccionados`}
-          className="group flex h-11 sm:h-12 items-center gap-2.5 rounded-full border border-emerald-500/50 bg-neutral-950/95 px-3.5 sm:px-4 text-white shadow-2xl shadow-emerald-500/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-400 ring-2 ring-emerald-500/30 animate-[float-soft_4.5s_ease-in-out_infinite] cursor-pointer"
-        >
-          <div className="relative flex size-7 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-            <ShoppingBag className="size-4 shrink-0 text-emerald-400" />
-            <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-emerald-500 font-heading text-[9px] font-black text-black shadow-sm">
-              {totalCount}
-            </span>
-          </div>
-          <div className="text-left leading-tight">
-            <p className="font-heading text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white">
-              Lista de Consulta
-            </p>
-            <p className="text-[9px] font-semibold text-emerald-400">
-              {totalCount} {totalCount === 1 ? 'modelo' : 'modelos'}
-            </p>
-          </div>
-        </button>
-      </div>
-    ) : null
+    return null
   }
 
   return (
@@ -130,7 +105,7 @@ export function OrderDrawer() {
       <div
         className="absolute inset-0"
         onClick={() => setIsDrawerOpen(false)}
-        aria-label="Cerrar bolsa"
+        aria-label="Cerrar carrito"
       />
 
       {/* Drawer Panel */}
@@ -143,7 +118,7 @@ export function OrderDrawer() {
             </div>
             <div>
               <h2 className="font-heading text-base font-bold uppercase tracking-wide">
-                Lista de Consulta
+                Carrito de Compras
               </h2>
               <p className="text-xs text-neutral-400">
                 {totalCount} {totalCount === 1 ? 'par agregado' : 'pares agregados'}
