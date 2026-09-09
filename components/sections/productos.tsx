@@ -186,8 +186,8 @@ export function Productos({
     if (searchQuery.trim() !== '' || selectedBrand !== 'todos' || selectedFilterSize) {
       return filteredProducts
     }
-    return getProductosPreviewHome(2)
-  }, [filteredProducts, searchQuery, selectedBrand, selectedFilterSize])
+    return getProductosPreviewHome(2, sneakerCatalog)
+  }, [filteredProducts, searchQuery, selectedBrand, selectedFilterSize, sneakerCatalog])
 
   const scrollDrop = (direction: 'left' | 'right') => {
     if (dropScrollRef.current) {

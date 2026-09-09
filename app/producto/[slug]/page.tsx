@@ -4,6 +4,9 @@ import { ProductoDetalle } from '@/components/producto-detalle'
 import { getMarcaFromProducto } from '@/lib/productos'
 import { getProductos, getProductoBySlug } from '@/lib/productos-db'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function generateStaticParams() {
   const productos = await getProductos()
   return productos.map((producto) => ({

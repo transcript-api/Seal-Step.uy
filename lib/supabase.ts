@@ -39,8 +39,11 @@ export const supabase = createClient(
   getSupabaseAnonKey(),
   {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      fetch: (url, init) => fetch(url, { ...init, cache: 'no-store' }),
     },
   }
 )
@@ -53,6 +56,9 @@ export function getSupabaseAdmin() {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
+    },
+    global: {
+      fetch: (url, init) => fetch(url, { ...init, cache: 'no-store' }),
     },
   })
 }

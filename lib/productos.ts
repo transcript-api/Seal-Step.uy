@@ -1004,13 +1004,14 @@ export function getProductosPorMarca(marcaSlug: string): Producto[] {
   return PRODUCTOS.filter((p) => getMarcaFromProducto(p) === slugLower)
 }
 
-export function getProductosPreviewHome(paresPorMarca = 2): Producto[] {
+export function getProductosPreviewHome(paresPorMarca = 2, fuente?: Producto[]): Producto[] {
   const ordenMarcas = ['nike', 'adidas', 'new-balance', 'vans', 'puma', 'slides']
   const seleccion: Producto[] = []
   const agregadosSlugs = new Set<string>()
+  const base = fuente && fuente.length > 0 ? fuente : PRODUCTOS
 
   for (const marca of ordenMarcas) {
-    const productosMarca = PRODUCTOS.filter((p) => getMarcaFromProducto(p) === marca)
+    const productosMarca = base.filter((p) => getMarcaFromProducto(p) === marca)
     const primeros = productosMarca.slice(0, paresPorMarca)
     for (const prod of primeros) {
       if (!agregadosSlugs.has(prod.slug)) {

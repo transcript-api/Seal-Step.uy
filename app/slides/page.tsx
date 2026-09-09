@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, ArrowUpRight, ChevronRight } from 'lucide-react'
-import { getProductosPorMarca, getMarcaConfig } from '@/lib/productos'
+import { getMarcaConfig, getMarcaFromProducto } from '@/lib/productos'
+import { getProductos } from '@/lib/productos-db'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Reveal } from '@/components/reveal'
@@ -9,14 +10,18 @@ import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { AshText } from '@/components/ash-text'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export const metadata = {
   title: 'Chanclas Slide Importadas | Seal Step',
   description: 'Colección exclusiva de chanclas slide, slides y calzado de verano importado.',
 }
 
-export default function SlidesPage() {
+export default async function SlidesPage() {
   const config = getMarcaConfig('slides')
-  const productos = getProductosPorMarca('slides')
+  const allProductos = await getProductos()
+  const productos = allProductos.filter((p) => getMarcaFromProducto(p) === 'slides')
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">

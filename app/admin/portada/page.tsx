@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Reordenar modelos destacados en la primera página mediante arrastrar y soltar.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPortadaPage() {
   const productos = await getProductos()
 

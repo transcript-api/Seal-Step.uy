@@ -13,6 +13,8 @@ import {
 } from 'lucide-react'
 import { getProductos } from '@/lib/productos-db'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardPage() {
   const productos = await getProductos()
 

@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: 'Explorá nuestro catálogo completo de championes importados y calzado urbano en Uruguay.',
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function CatalogoPage() {
   const productos = await getProductos()
 

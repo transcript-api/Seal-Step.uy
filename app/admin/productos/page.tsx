@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Gestión y edición rápida de modelos, talles y precios.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminProductosPage() {
   const productos = await getProductos()
 

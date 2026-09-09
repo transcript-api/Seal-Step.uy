@@ -2,13 +2,17 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, ArrowUpRight, ChevronRight } from 'lucide-react'
-import { MARCAS, getProductosPorMarca, getMarcaConfig } from '@/lib/productos'
+import { MARCAS, getMarcaConfig, getMarcaFromProducto } from '@/lib/productos'
+import { getProductos } from '@/lib/productos-db'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Reveal } from '@/components/reveal'
 import { WA_LINKS } from '@/lib/site'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { AshText } from '@/components/ash-text'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export function generateStaticParams() {
   return MARCAS.map((m) => ({ marca: m.slug }))
@@ -30,7 +34,8 @@ export default async function MarcaPage({ params }: { params: Promise<{ marca: s
   const config = getMarcaConfig(marca)
   if (!config) notFound()
 
-  const productos = getProductosPorMarca(marca)
+  const allProductos = await getProductos()
+  const productos = allProductos.filter((p) => getMarcaFromProducto(p) === marca.toLowerCase())
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">

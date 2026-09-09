@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase'
 import { PRODUCTOS, type Producto } from '@/lib/productos'
 
 /**
@@ -22,7 +22,8 @@ export async function getProductos(): Promise<Producto[]> {
   }
 
   try {
-    // 1. Obtener productos de la vista pública segura
+    const supabase = getSupabaseAdmin()
+    // 1. Obtener productos de la tabla productos
     const { data: prods, error: errProds } = await supabase
       .from('v_catalogo_productos')
       .select('*')
