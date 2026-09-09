@@ -75,6 +75,16 @@ export async function getProductos(): Promise<Producto[]> {
         ),
       ]
 
+      // Extraer orden de etiquetas si existe (ej. orden_0, orden_1...)
+      let ordenNum: number | undefined = undefined
+      if (Array.isArray(p.etiquetas)) {
+        const ordenTag = p.etiquetas.find((t: string) => typeof t === 'string' && t.startsWith('orden_'))
+        if (ordenTag) {
+          const num = parseInt(ordenTag.replace('orden_', ''), 10)
+          if (!isNaN(num)) ordenNum = num
+        }
+      }
+
       return {
         slug: p.slug,
         nombre: p.nombre,
@@ -87,6 +97,8 @@ export async function getProductos(): Promise<Producto[]> {
         talles: tallesProducto.length > 0 ? tallesProducto : ['38', '39', '40', '41', '42'],
         stock: (p.estado_stock_general as Producto['stock']) || 'disponible',
         descripcion: p.descripcion,
+        destacado: Boolean(p.destacado),
+        orden: ordenNum,
         detalles: p.detalles && Array.isArray(p.detalles) && p.detalles.length > 0 ? p.detalles : [
           'Envíos a todo el país (24 a 72 hs)',
           'Compra 100% segura y garantizada',

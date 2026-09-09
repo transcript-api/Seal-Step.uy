@@ -19,13 +19,24 @@ import {
 import type { Producto } from '@/lib/productos'
 
 export function AdminPortadaReorder({ initialProducts }: { initialProducts: Producto[] }) {
-  // Inicialmente, los primeros 8-12 productos están en Portada
-  const defaultFeaturedSlugs = initialProducts.slice(0, 8).map((p) => p.slug)
+  // Inicialmente, leer los que están marcados como destacados ordenados por su índice
+  const defaultFeaturedSlugs = React.useMemo(() => {
+    const destacados = initialProducts
+      .filter((p) => p.destacado)
+      .sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999))
+      .map((p) => p.slug)
+
+    // Si aún no se guardó ninguno como destacado, usar los primeros 8 por defecto
+    return destacados.length > 0
+      ? destacados
+      : initialProducts.slice(0, 8).map((p) => p.slug)
+  }, [initialProducts])
   
   const [featuredSlugs, setFeaturedSlugs] = useState<string[]>(defaultFeaturedSlugs)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Productos actualmente en la portada (en el orden exacto del array featuredSlugs)
   const homeProducts = featuredSlugs
@@ -90,14 +101,32 @@ export function AdminPortadaReorder({ initialProducts }: { initialProducts: Prod
     }
   }
 
-  // Simulación de guardado
-  const handleSave = () => {
+  // Guardado real en Supabase vía API
+  const handleSave = async () => {
     setIsSaving(true)
-    setTimeout(() => {
-      setIsSaving(false)
+    setSaveError(null)
+
+    try {
+      const res = await fetch('/api/admin/portada', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ featuredSlugs }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Error al guardar orden de portada')
+      }
+
       setIsSaved(true)
-      setTimeout(() => setIsSaved(false), 3000)
-    }, 600)
+      setTimeout(() => setIsSaved(false), 4000)
+    } catch (err: unknown) {
+      const error = err as Error
+      setSaveError(error.message)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -133,10 +162,16 @@ export function AdminPortadaReorder({ initialProducts }: { initialProducts: Prod
             }`}
           >
             {isSaved ? <Check className="size-4" /> : <Save className="size-4" />}
-            <span>{isSaving ? 'Guardando...' : isSaved ? '¡Orden Guardado!' : 'Guardar en Portada'}</span>
+            <span>{isSaving ? 'Guardando en Supabase...' : isSaved ? '¡Orden Guardado!' : 'Guardar en Portada'}</span>
           </button>
         </div>
       </div>
+
+      {saveError && (
+        <div className="p-4 rounded-xl bg-red-950/60 border border-red-500/50 text-red-300 text-xs font-semibold">
+          ⚠️ Error al guardar: {saveError}
+        </div>
+      )}
 
       {/* Grid Principal: Portada vs Catálogo */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

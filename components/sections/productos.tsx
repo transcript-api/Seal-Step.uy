@@ -181,10 +181,17 @@ export function Productos({
     })
   }, [sneakerCatalog, selectedBrand, selectedFilterSize, searchQuery])
 
-  // Preview balanceado con 2 modelos de cada marca para la página principal
+  // Productos de la portada: si hay calzados destacados configurados por el dueño, usarlos en su orden exacto
   const visibleProducts = useMemo(() => {
     if (searchQuery.trim() !== '' || selectedBrand !== 'todos' || selectedFilterSize) {
       return filteredProducts
+    }
+    const destacadosPortada = sneakerCatalog
+      .filter((p) => p.destacado)
+      .sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999))
+
+    if (destacadosPortada.length > 0) {
+      return destacadosPortada
     }
     return getProductosPreviewHome(2, sneakerCatalog)
   }, [filteredProducts, searchQuery, selectedBrand, selectedFilterSize, sneakerCatalog])

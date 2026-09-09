@@ -29,6 +29,10 @@ export type Producto = {
   stock: 'disponible' | 'ultimas' | 'agotado'
   descripcion: string
   detalles: string[]
+  /** Si el producto está seleccionado para la portada principal */
+  destacado?: boolean
+  /** Posición de orden manual en la portada (0, 1, 2...) */
+  orden?: number
   /** Ruta relativa a /public. La primera imagen es la portada del catálogo. */
   imagenes: { src: string; alt: string }[]
 }
