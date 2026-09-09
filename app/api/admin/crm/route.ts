@@ -3,13 +3,22 @@ import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
+function getSupabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+
+  if (!url || !key) {
+    throw new Error('Variables de entorno Supabase no configuradas')
+  }
+
+  return createClient(url, key)
+}
+
 
 export async function GET() {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
+
     // 1. Obtener clientes de la tabla clientes
     const { data: clientesData, error: clientesError } = await supabaseAdmin
       .from('clientes')
