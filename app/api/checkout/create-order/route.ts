@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createPreference, type MPItem } from '@/lib/mercadopago'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import type { OrderItem } from '@/lib/order-context'
 
 export const dynamic = 'force-dynamic'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
 
 function parsePrecioUYU(precioStr: string | null | undefined): number {
   if (!precioStr) return 2490

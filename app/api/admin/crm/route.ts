@@ -1,18 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
-
-function getSupabaseAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-
-  if (!url || !key) {
-    throw new Error('Variables de entorno Supabase no configuradas')
-  }
-
-  return createClient(url, key)
-}
 
 
 export async function GET() {

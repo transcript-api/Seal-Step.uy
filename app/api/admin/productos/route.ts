@@ -1,21 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
-
-function getSupabaseAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-
-  if (!url || !key) {
-    throw new Error(
-      `Variables de entorno de Supabase no configuradas en Vercel. ` +
-      `URL: ${url ? 'OK' : 'FALTA'}, KEY: ${key ? 'OK' : 'FALTA'}. ` +
-      `Ve a Vercel Dashboard > Settings > Environment Variables y asegúrate de tener NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY.`
-    )
-  }
-
-  return createClient(url, key)
-}
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: Request) {
   try {
