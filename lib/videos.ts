@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { Slide } from '@/components/ui/carousel-07'
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase'
 
 export type DropVideoItem = {
   id: string
@@ -205,4 +206,54 @@ export function saveSiteVideos(newConfig: SiteVideosConfig): boolean {
     console.error('Error saving site-videos.json:', err)
     return false
   }
+}
+
+export async function getSiteVideosAsync(): Promise<SiteVideosConfig> {
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = getSupabaseAdmin()
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('notas')
+        .eq('id', '00000000-0000-0000-0000-000000000002')
+        .single()
+      if (!error && data?.notas) {
+        const parsed = JSON.parse(data.notas)
+        return {
+          dropVideos: Array.isArray(parsed.dropVideos) && parsed.dropVideos.length > 0 ? parsed.dropVideos : DEFAULT_VIDEOS.dropVideos,
+          heroCarousel: Array.isArray(parsed.heroCarousel) && parsed.heroCarousel.length > 0 ? parsed.heroCarousel : DEFAULT_VIDEOS.heroCarousel,
+          mayoristaVideo: parsed.mayoristaVideo || DEFAULT_VIDEOS.mayoristaVideo,
+          galeriaReels: Array.isArray(parsed.galeriaReels) && parsed.galeriaReels.length > 0 ? parsed.galeriaReels : DEFAULT_VIDEOS.galeriaReels,
+        }
+      }
+    } catch (err) {
+      console.warn('Aviso al leer videos de Supabase:', err)
+    }
+  }
+  return getSiteVideos()
+}
+
+export async function saveSiteVideosAsync(newConfig: SiteVideosConfig): Promise<boolean> {
+  saveSiteVideos(newConfig)
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = getSupabaseAdmin()
+      await supabase.from('clientes').upsert(
+        {
+          id: '00000000-0000-0000-0000-000000000002',
+          telefono: '000000000',
+          email: 'system_videos@sealstep.internal',
+          nombre: 'Configuración Videos Tienda',
+          origen: 'system_videos',
+          notas: JSON.stringify(newConfig),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' }
+      )
+      return true
+    } catch (err) {
+      console.error('Error saving videos to Supabase:', err)
+    }
+  }
+  return true
 }

@@ -8,10 +8,12 @@ export async function GET() {
   try {
     const supabaseAdmin = getSupabaseAdmin()
 
-    // 1. Obtener clientes de la tabla clientes
+    // 1. Obtener clientes de la tabla clientes (excluyendo registros internos de configuración)
     const { data: clientesData, error: clientesError } = await supabaseAdmin
       .from('clientes')
       .select('*')
+      .neq('origen', 'system_config')
+      .neq('origen', 'system_videos')
       .order('created_at', { ascending: false })
 
     if (clientesError) {

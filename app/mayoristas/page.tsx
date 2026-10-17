@@ -24,7 +24,7 @@ import { MayoristaVideo } from '@/components/sections/mayorista-video'
 import { AshText } from '@/components/ash-text'
 import { CounterStat } from '@/components/counter-stat'
 import { ParallaxLayer } from '@/components/parallax-layer'
-import { getSiteVideos } from '@/lib/videos'
+import { getSiteVideosAsync } from '@/lib/videos'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -191,7 +191,7 @@ const FAQS_MAYORISTAS = [
 ]
 
 export default async function MayoristasPage() {
-  const siteVideos = getSiteVideos()
+  const siteVideos = await getSiteVideosAsync()
   const mayoristaVideo = siteVideos.mayoristaVideo
 
   return (

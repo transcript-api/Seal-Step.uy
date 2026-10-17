@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase'
 import localFallbackJson from '@/data/site-config.json'
 
 export interface SiteConfig {
@@ -118,50 +118,51 @@ export async function getSiteConfig(): Promise<SiteConfig> {
   }
 
   try {
+    const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
-      .from('site_config')
-      .select('clave, valor')
+      .from('clientes')
+      .select('notas')
+      .eq('id', '00000000-0000-0000-0000-000000000001')
+      .single()
 
-    if (error || !data || data.length === 0) {
-      cachedConfig = baseConfig
-      cacheExpiry = now + CACHE_TTL_MS
-      return baseConfig
+    if (!error && data?.notas) {
+      try {
+        const configMap = JSON.parse(data.notas) as Record<string, unknown>
+        const mergedConfig: SiteConfig = {
+          ...baseConfig,
+          ...configMap,
+          statsHero: {
+            ...baseConfig.statsHero,
+            ...(typeof configMap.statsHero === 'object' && configMap.statsHero !== null ? (configMap.statsHero as any) : {}),
+          },
+          envios: {
+            ...baseConfig.envios,
+            ...(typeof configMap.envios === 'object' && configMap.envios !== null ? (configMap.envios as any) : {}),
+          },
+          anuncios: {
+            ...baseConfig.anuncios,
+            ...(typeof configMap.anuncios === 'object' && configMap.anuncios !== null ? (configMap.anuncios as any) : {}),
+          },
+          mercadoPago: {
+            ...baseConfig.mercadoPago,
+            ...(typeof configMap.mercadoPago === 'object' && configMap.mercadoPago !== null ? (configMap.mercadoPago as any) : {}),
+          },
+        }
+
+        cachedConfig = mergedConfig
+        cacheExpiry = now + CACHE_TTL_MS
+        return mergedConfig
+      } catch (parseErr) {
+        console.warn('Aviso al parsear JSON de site_config:', parseErr)
+      }
     }
-
-    // Convertir filas clave-valor a objeto SiteConfig
-    const configMap: Record<string, unknown> = {}
-    for (const row of data) {
-      configMap[row.clave] = row.valor
-    }
-
-    const mergedConfig: SiteConfig = {
-      ...DEFAULT_SITE_CONFIG,
-      ...configMap,
-      statsHero: {
-        ...DEFAULT_SITE_CONFIG.statsHero,
-        ...(typeof configMap.statsHero === 'object' && configMap.statsHero !== null ? configMap.statsHero : {}),
-      },
-      envios: {
-        ...DEFAULT_SITE_CONFIG.envios,
-        ...(typeof configMap.envios === 'object' && configMap.envios !== null ? configMap.envios : {}),
-      },
-      anuncios: {
-        ...DEFAULT_SITE_CONFIG.anuncios,
-        ...(typeof configMap.anuncios === 'object' && configMap.anuncios !== null ? configMap.anuncios : {}),
-      },
-      mercadoPago: {
-        ...DEFAULT_SITE_CONFIG.mercadoPago,
-        ...(typeof configMap.mercadoPago === 'object' && configMap.mercadoPago !== null ? configMap.mercadoPago : {}),
-      },
-    }
-
-    cachedConfig = mergedConfig
-    cacheExpiry = now + CACHE_TTL_MS
-    return mergedConfig
   } catch (err) {
-    console.warn('⚠️ No se pudo consultar site_config en Supabase, usando respaldo seguro:', err)
-    return DEFAULT_SITE_CONFIG
+    console.warn('Aviso al consultar site_config en Supabase:', err)
   }
+
+  cachedConfig = baseConfig
+  cacheExpiry = now + CACHE_TTL_MS
+  return baseConfig
 }
 
 /**

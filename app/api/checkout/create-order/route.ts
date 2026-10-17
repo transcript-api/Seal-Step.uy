@@ -14,6 +14,7 @@ function parsePrecioUYU(precioStr: string | null | undefined): number {
 
 export async function POST(req: Request) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const body = await req.json()
     const {
       contacto,

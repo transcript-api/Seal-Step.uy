@@ -11,18 +11,18 @@ import { Faq } from '@/components/sections/faq'
 import { Contacto } from '@/components/sections/contacto'
 import Testimonials from '@/components/sections/testimonials'
 import { getProductos } from '@/lib/productos-db'
-import { getSiteVideos } from '@/lib/videos'
+import { getSiteVideosAsync } from '@/lib/videos'
 import { getSiteConfig } from '@/lib/site-config'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function Page() {
-  const [productos, siteConfig] = await Promise.all([
+  const [productos, siteConfig, siteVideos] = await Promise.all([
     getProductos(),
     getSiteConfig(),
+    getSiteVideosAsync(),
   ])
-  const siteVideos = getSiteVideos()
 
   return (
     <>

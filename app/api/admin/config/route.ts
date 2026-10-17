@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSiteConfig, invalidateSiteConfigCache, DEFAULT_SITE_CONFIG, type SiteConfig } from '@/lib/site-config'
-import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,23 +39,24 @@ export async function POST(req: Request) {
       console.warn('Aviso al escribir en data/site-config.json:', fsErr)
     }
 
-    // 2. Si Supabase está disponible, persistir con clave de servicio en site_config
+    // 2. Si Supabase está disponible, persistir permanentemente en Supabase
     if (isSupabaseConfigured()) {
       try {
-        const { createClient } = await import('@supabase/supabase-js')
-        const adminClient = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-          process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        const supabase = getSupabaseAdmin()
+        await supabase.from('clientes').upsert(
+          {
+            id: '00000000-0000-0000-0000-000000000001',
+            telefono: '000000000',
+            email: 'system_config@sealstep.internal',
+            nombre: 'Configuración General Tienda',
+            origen: 'system_config',
+            notas: JSON.stringify(updatedLocal),
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
         )
-        const keysToSave = Object.entries(body)
-        for (const [clave, valor] of keysToSave) {
-          await adminClient.from('site_config').upsert(
-            { clave, valor, updated_at: new Date().toISOString() },
-            { onConflict: 'clave' }
-          )
-        }
       } catch (dbErr) {
-        console.warn('Aviso al guardar en site_config de Supabase:', dbErr)
+        console.warn('Aviso al guardar en Supabase:', dbErr)
       }
     }
 
