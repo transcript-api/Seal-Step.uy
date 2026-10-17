@@ -244,3 +244,130 @@ export async function sendResetPasswordEmail(email: string, nombre: string, rese
     html,
   })
 }
+
+/**
+ * Plantilla de correo para invitación a nuevo Administrador
+ */
+export function generateAdminInvitationHtml(data: {
+  nombre: string
+  email: string
+  password: string
+  loginUrl?: string
+}): string {
+  const { nombre, email, password, loginUrl = 'https://seal-step-uy.vercel.app/admin/login' } = data
+  const firstName = nombre ? nombre.split(' ')[0] : 'Administrador'
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso Administrativo - Seal Step Uruguay</title>
+</head>
+<body style="margin:0; padding:0; background:#0a0a0a; font-family:'Helvetica Neue', Arial, sans-serif; color:#ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a; padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:560px; background:#111111; border:1px solid #262626; border-radius:24px; padding:40px 32px; text-align:center;">
+          <!-- Badge -->
+          <tr>
+            <td>
+              <div style="display:inline-block; padding: 6px 16px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; margin-bottom: 24px;">
+                <span style="color: #10b981; font-size: 11px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;">🛡️ ACCESO ADMINISTRATIVO</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Título -->
+          <tr>
+            <td>
+              <h1 style="color:#ffffff; font-size:26px; font-weight:900; letter-spacing:-0.5px; margin:0 0 12px; line-height:1.2;">
+                ¡Hola, <span style="color:#10b981;">${firstName}</span>!
+              </h1>
+              <p style="color:#a3a3a3; font-size:14px; line-height:1.6; margin:0 0 28px;">
+                Fuiste invitado/a como <strong>Administrador de Seal Step Uruguay</strong>. A continuación tenés tus datos de ingreso oficiales para gestionar el catálogo, pedidos y métricas de la tienda.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Tarjeta de Credenciales -->
+          <tr>
+            <td>
+              <div style="background:#181818; border:1px solid #333333; border-radius:18px; padding:24px; text-align:left; margin-bottom:28px;">
+                <p style="margin:0 0 16px; color:#10b981; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">
+                  Tus Credenciales de Ingreso:
+                </p>
+
+                <div style="margin-bottom:14px;">
+                  <span style="display:block; color:#888888; font-size:11px; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Correo Electrónico:</span>
+                  <div style="background:#0c0c0c; border:1px solid #262626; border-radius:10px; padding:10px 14px; color:#ffffff; font-size:14px; font-weight:700; font-family:monospace;">
+                    ${email}
+                  </div>
+                </div>
+
+                <div style="margin-bottom:6px;">
+                  <span style="display:block; color:#888888; font-size:11px; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Contraseña Asignada:</span>
+                  <div style="background:#0c0c0c; border:1px solid #262626; border-radius:10px; padding:10px 14px; color:#10b981; font-size:16px; font-weight:900; font-family:monospace; letter-spacing:0.05em;">
+                    ${password}
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Botón de Acceso -->
+          <tr>
+            <td>
+              <div style="margin:10px 0 28px;">
+                <a href="${loginUrl}" style="background:#10b981; color:#000000; font-weight:900; font-size:14px; text-transform:uppercase; letter-spacing:0.08em; padding:16px 36px; border-radius:100px; text-decoration:none; display:inline-block; box-shadow:0 10px 25px -5px rgba(16,185,129,0.3);">
+                  Acceder al Panel de Control →
+                </a>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Nota de Seguridad -->
+          <tr>
+            <td>
+              <div style="background:rgba(234,179,8,0.06); border:1px solid rgba(234,179,8,0.2); border-radius:12px; padding:14px; text-align:left; margin-bottom:24px;">
+                <p style="margin:0; color:#fde047; font-size:12px; line-height:1.5;">
+                  🔒 <strong>Recomendación de seguridad:</strong> Guardá estas credenciales en un lugar seguro. No compartas este correo con nadie ajeno a la administración.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="border-top:1px solid #222222; padding-top:20px;">
+              <p style="margin:0; color:#555555; font-size:11px;">
+                Seal Step Uruguay · Panel Administrativo Oficial<br/>
+                Enviado a: ${email}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+/**
+ * Envía el correo con credenciales e invitación al nuevo administrador
+ */
+export async function sendAdminInvitationEmail(data: {
+  nombre: string
+  email: string
+  password: string
+  loginUrl?: string
+}): Promise<{ success: boolean; simulated?: boolean }> {
+  const html = generateAdminInvitationHtml(data)
+  return sendEmail({
+    to: data.email,
+    subject: `🛡️ Acceso Administrativo a Seal Step Uruguay - Tus Credenciales`,
+    html,
+  })
+}
+

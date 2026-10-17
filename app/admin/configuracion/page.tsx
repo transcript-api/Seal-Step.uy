@@ -93,6 +93,7 @@ export default function AdminConfiguracionPage() {
 
     loadConfig()
     loadReglas()
+    loadAdmins()
   }, [])
 
   const loadAdmins = async () => {
@@ -970,10 +971,10 @@ export default function AdminConfiguracionPage() {
             <div className="rounded-2xl border border-neutral-800 bg-[#0d0d0d] p-6 space-y-5">
               <h2 className="text-base font-heading font-black uppercase text-white tracking-wide flex items-center gap-2">
                 <KeyRound className="size-4 text-yellow-400" />
-                <span>Cambiar Contraseña Maestra</span>
+                <span>Cambiar Contraseña Principal</span>
               </h2>
               <p className="text-xs text-neutral-400">
-                Esta es la contraseña del administrador principal ({process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@sealstep.uy'}). Cambiala regularmente por seguridad.
+                Esta es la contraseña del acceso administrativo principal al panel. Podés actualizarla cuando desees por una clave segura.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1035,53 +1036,64 @@ export default function AdminConfiguracionPage() {
               </div>
 
               <div className="p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20 text-xs text-yellow-400/80">
-                ⚠️ <strong>Importante:</strong> Luego de cambiar la contraseña, cerrá sesión y volvé a ingresar con la nueva contraseña para confirmar que funciona correctamente.
+                ⚠️ <strong>Importante:</strong> Luego de cambiar la contraseña, cerrá sesión y volvé a ingresar con la nueva contraseña para confirmar el cambio.
               </div>
             </div>
 
             {/* ── Gestión de administradores extra ── */}
-            <div className="rounded-2xl border border-neutral-800 bg-[#0d0d0d] p-6 space-y-5">
-              <h2 className="text-base font-heading font-black uppercase text-white tracking-wide flex items-center gap-2">
-                <UserPlus className="size-4 text-emerald-400" />
-                <span>Administradores Adicionales</span>
-              </h2>
-              <p className="text-xs text-neutral-400">
-                Podés agregar más personas que puedan acceder al panel de administración con su propio email y contraseña.
-              </p>
+            <div className="rounded-2xl border border-neutral-800 bg-[#0d0d0d] p-6 space-y-6">
+              <div>
+                <h2 className="text-base font-heading font-black uppercase text-white tracking-wide flex items-center gap-2">
+                  <UserPlus className="size-4 text-emerald-400" />
+                  <span>Administradores Autorizados</span>
+                </h2>
+                <p className="text-xs text-neutral-400 mt-1">
+                  Agregá colaboradores que puedan acceder al panel con su propio correo y contraseña. Podés revocar o agregar nuevos accesos cuando lo necesites.
+                </p>
+              </div>
 
               {/* Formulario para agregar nuevo admin */}
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 space-y-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">+ Nuevo Administrador</p>
+              <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.04] p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                    <UserPlus className="size-3.5" />
+                    <span>+ Invitar Nuevo Administrador</span>
+                  </p>
+                  <span className="text-[11px] text-neutral-400">
+                    Se enviará una invitación a su correo
+                  </span>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Nombre</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Nombre Completo</label>
                     <input
                       type="text"
                       value={newAdminNombre}
                       onChange={(e) => setNewAdminNombre(e.target.value)}
-                      placeholder="Ej: María García"
-                      className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                      placeholder="Ej: Carlos Silva"
+                      className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Email</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Correo Electrónico</label>
                     <input
                       type="email"
                       value={newAdminEmail}
                       onChange={(e) => setNewAdminEmail(e.target.value)}
-                      placeholder="maria@sealstep.uy"
-                      className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                      placeholder="colaborador@ejemplo.com"
+                      className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Contraseña</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Contraseña Asignada</label>
                     <div className="relative">
                       <input
                         type={showNewAdminPass ? 'text' : 'password'}
                         value={newAdminPass}
                         onChange={(e) => setNewAdminPass(e.target.value)}
-                        placeholder="Mín. 8 caracteres"
-                        className="w-full px-4 py-3 pr-10 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                        placeholder="Mín. 6 caracteres"
+                        className="w-full px-4 py-3 pr-10 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition"
                       />
                       <button type="button" onClick={() => setShowNewAdminPass(!showNewAdminPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition">
                         {showNewAdminPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -1089,60 +1101,105 @@ export default function AdminConfiguracionPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end">
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                  <p className="text-[11px] text-neutral-400 flex items-center gap-1.5">
+                    <span>📩</span>
+                    <span>Al confirmar, la persona recibirá un correo electrónico con sus datos de ingreso y el enlace al panel.</span>
+                  </p>
+
                   <button
                     type="button"
                     onClick={handleAddAdmin}
                     disabled={savingAdmin}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 disabled:opacity-50 shrink-0"
                   >
-                    {savingAdmin ? <span className="size-4 rounded-full border-2 border-black border-t-transparent animate-spin" /> : <UserPlus className="size-4" />}
-                    <span>Agregar Administrador</span>
+                    {savingAdmin ? (
+                      <span className="flex items-center gap-2">
+                        <span className="size-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
+                        <span>Enviando invitación...</span>
+                      </span>
+                    ) : (
+                      <>
+                        <UserPlus className="size-4" />
+                        <span>Invitar y Activar Acceso</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
 
-              {/* Lista de admins existentes */}
-              {loadingAdmins ? (
-                <div className="flex items-center gap-2 text-neutral-500 text-xs py-4">
-                  <span className="size-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
-                  Cargando administradores...
+              {/* Lista de administradores activos */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-xs font-black uppercase tracking-wider text-neutral-400">
+                    Administradores con Acceso ({admins.length})
+                  </p>
+                  <button
+                    type="button"
+                    onClick={loadAdmins}
+                    className="text-xs text-emerald-400 hover:text-emerald-300 font-bold transition flex items-center gap-1"
+                  >
+                    Actualizar lista ↻
+                  </button>
                 </div>
-              ) : admins.length === 0 ? (
-                <div className="text-center py-8 text-neutral-500 text-sm">
-                  <ShieldCheck className="size-10 mx-auto mb-3 text-neutral-700" />
-                  <p>No hay administradores adicionales configurados.</p>
-                  <p className="text-xs mt-1 text-neutral-600">Solo existe el administrador maestro.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 px-1">Administradores activos</p>
-                  {admins.map((admin) => (
-                    <div key={admin.email} className="flex items-center justify-between p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 group hover:border-neutral-700 transition">
-                      <div className="flex items-center gap-3">
-                        <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                          <ShieldCheck className="size-4 text-emerald-400" />
+
+                {loadingAdmins ? (
+                  <div className="flex items-center justify-center gap-2 text-neutral-500 text-xs py-8">
+                    <span className="size-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+                    <span>Cargando administradores desde la base de datos...</span>
+                  </div>
+                ) : admins.length === 0 ? (
+                  <div className="text-center py-10 px-4 rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/30">
+                    <ShieldCheck className="size-10 mx-auto mb-2 text-neutral-600" />
+                    <p className="text-sm font-bold text-neutral-300">No hay administradores adicionales todavía</p>
+                    <p className="text-xs mt-1 text-neutral-500 max-w-sm mx-auto">
+                      Usá el formulario de arriba para invitar a tus colaboradores y darles acceso seguro al panel.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {admins.map((admin) => (
+                      <div
+                        key={admin.email}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-neutral-800 bg-neutral-900/70 hover:border-neutral-700 transition gap-4"
+                      >
+                        <div className="flex items-center gap-3.5">
+                          <div className="size-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                            <ShieldCheck className="size-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-sm font-black text-white">{admin.nombre}</p>
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                Activo
+                              </span>
+                            </div>
+                            <p className="text-xs text-neutral-300 font-mono mt-0.5">{admin.email}</p>
+                            <p className="text-[10px] text-neutral-500 mt-1">
+                              Acceso creado el: {new Date(admin.creado).toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-white">{admin.nombre}</p>
-                          <p className="text-xs text-neutral-400">{admin.email}</p>
-                          <p className="text-[10px] text-neutral-600 mt-0.5">Creado: {new Date(admin.creado).toLocaleDateString('es-UY')}</p>
+
+                        <div className="flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAdmin(admin.email, admin.nombre)}
+                            disabled={savingAdmin}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white text-xs font-bold transition disabled:opacity-30"
+                            title="Revocar acceso inmediatamente"
+                          >
+                            <UserX className="size-4" />
+                            <span>Revocar Acceso</span>
+                          </button>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteAdmin(admin.email, admin.nombre)}
-                        disabled={savingAdmin}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white text-xs font-bold transition opacity-0 group-hover:opacity-100 disabled:opacity-30"
-                        title="Eliminar administrador"
-                      >
-                        <UserX className="size-3.5" />
-                        <span>Eliminar</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
           </div>

@@ -1,42 +1,9 @@
 import { NextResponse } from 'next/server'
-import {
-  createAdminToken,
-  ADMIN_COOKIE_NAME,
-  DEFAULT_ADMIN_EMAIL,
-  DEFAULT_ADMIN_PASSWORD,
-} from '@/lib/auth'
-import { supabase, isSupabaseConfigured, getSupabaseAdmin } from '@/lib/supabase'
+import { createAdminToken, ADMIN_COOKIE_NAME } from '@/lib/auth'
+import { verifyAdminCredentials } from '@/lib/admins'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
-
-// Hashear contraseña (debe coincidir con el método en /api/admin/admins)
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password + (process.env.ADMIN_SESSION_SECRET || 'seal-step-secret-session-token-key-2026'))
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
-}
-
-// Verificar contra admins adicionales guardados en Supabase
-async function checkExtraAdmins(email: string, password: string): Promise<boolean> {
-  try {
-    const supabaseAdmin = getSupabaseAdmin()
-    const { data } = await supabaseAdmin
-      .from('clientes')
-      .select('email')
-      .eq('origen', 'system_admins')
-      .single()
-    if (!data?.email) return false
-    const admins = JSON.parse(data.email) as Array<{ email: string; nombre: string; hash?: string }>
-    const match = admins.find((a) => a.email === email && a.email !== '__master_password_hash__')
-    if (!match || !match.hash) return false
-    const hash = await hashPassword(password)
-    return hash === match.hash
-  } catch {
-    return false
-  }
-}
 
 export async function POST(req: Request) {
   try {
@@ -53,21 +20,16 @@ export async function POST(req: Request) {
     const cleanPassword = String(password)
 
     let isAuthenticated = false
+    let authUserEmail = cleanEmail
 
-    // 1. Verificación contra credenciales maestras de entorno / configuración
-    if (
-      cleanEmail === DEFAULT_ADMIN_EMAIL.toLowerCase() &&
-      cleanPassword === DEFAULT_ADMIN_PASSWORD
-    ) {
+    // 1. Verificación contra nuestro almacén de administradores (Maestro y Adicionales)
+    const adminCheck = await verifyAdminCredentials(cleanEmail, cleanPassword)
+    if (adminCheck.valid) {
       isAuthenticated = true
+      if (adminCheck.email) authUserEmail = adminCheck.email
     }
 
-    // 2. Verificar contra administradores adicionales en base de datos
-    if (!isAuthenticated) {
-      isAuthenticated = await checkExtraAdmins(cleanEmail, cleanPassword)
-    }
-
-    // 3. Si no coincide con ninguno local y Supabase está configurado, intentar Supabase Auth
+    // 2. Si no coincide localmente y Supabase Auth está configurado, intentar Supabase Auth
     if (!isAuthenticated && isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -76,6 +38,7 @@ export async function POST(req: Request) {
         })
         if (!error && data.user) {
           isAuthenticated = true
+          authUserEmail = data.user.email || cleanEmail
         }
       } catch (authErr) {
         console.warn('Aviso en Supabase Auth login:', authErr)
@@ -89,13 +52,13 @@ export async function POST(req: Request) {
       )
     }
 
-    // Generar token seguro
-    const token = await createAdminToken(cleanEmail)
+    // Generar token seguro con la identidad del administrador
+    const token = await createAdminToken(authUserEmail)
 
     const response = NextResponse.json({
       success: true,
       message: 'Inicio de sesión exitoso.',
-      email: cleanEmail,
+      email: authUserEmail,
     })
 
     // Establecer cookie HTTP-Only segura
@@ -106,7 +69,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 7 * 24 * 60 * 60, // 7 días
+      maxAge: 7 * 24 * 60 * 60, // 7 días de sesión activa
     })
 
     return response

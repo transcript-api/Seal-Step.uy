@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyAdminToken, ADMIN_COOKIE_NAME } from '@/lib/auth'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import {
+  getStoredAdmins,
+  saveStoredAdmins,
+  hashPassword,
+  verifyPassword,
+  AdminUser,
+} from '@/lib/admins'
+import { sendAdminInvitationEmail } from '@/lib/email'
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
-// Tabla clave en clientes donde guardamos la lista de admins extra
-const ADMINS_ORIGIN = 'system_admins'
-
-/* ─── Helper: verificar sesión ─── */
+/* ─── Helper: verificar sesión de administrador ─── */
 async function isAuthorized(): Promise<boolean> {
   try {
     const cookieStore = await cookies()
@@ -19,63 +24,34 @@ async function isAuthorized(): Promise<boolean> {
   }
 }
 
-/* ─── Helper: hashear contraseña con Web Crypto ─── */
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password + process.env.ADMIN_SESSION_SECRET || 'seal-step-secret-session-token-key-2026')
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
-}
-
-/* ─── Helper: verificar contraseña ─── */
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const computed = await hashPassword(password)
-  return computed === hash
-}
-
-/* ─── Leer lista de admins desde Supabase ─── */
-async function getAdminsFromDB(): Promise<{ email: string; nombre: string; creado: string }[]> {
-  try {
-    const supabaseAdmin = getSupabaseAdmin()
-    const { data } = await supabaseAdmin
-      .from('clientes')
-      .select('nombre, email')
-      .eq('origen', ADMINS_ORIGIN)
-      .single()
-
-    if (data?.email) {
-      const parsed = JSON.parse(data.email)
-      return Array.isArray(parsed) ? parsed : []
-    }
-  } catch {}
-  return []
-}
-
-/* ─── Guardar lista de admins en Supabase ─── */
-async function saveAdminsToDB(admins: { email: string; nombre: string; creado: string }[]) {
-  const supabaseAdmin = getSupabaseAdmin()
-  await supabaseAdmin
-    .from('clientes')
-    .upsert(
-      { origen: ADMINS_ORIGIN, nombre: 'Administradores del sistema', email: JSON.stringify(admins) },
-      { onConflict: 'origen' }
-    )
-}
-
-/* ──────────────── GET: listar todos los admins ──────────────── */
+/* ──────────────── GET: Listar administradores ──────────────── */
 export async function GET() {
   if (!(await isAuthorized())) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
 
-  const admins = await getAdminsFromDB()
-  // No devolver los hashes de contraseña
-  const safe = admins.map(({ email, nombre, creado }) => ({ email, nombre, creado }))
-  return NextResponse.json({ success: true, admins: safe })
+  try {
+    const admins = await getStoredAdmins()
+    // Devolvemos lista segura sin hashes
+    const safeAdmins = admins
+      .filter((a) => a.rol !== 'master')
+      .map(({ id, email, nombre, creado, activo, rol }) => ({
+        id,
+        email,
+        nombre,
+        creado,
+        activo,
+        rol,
+      }))
+
+    return NextResponse.json({ success: true, admins: safeAdmins })
+  } catch (error) {
+    console.error('Error al listar admins:', error)
+    return NextResponse.json({ success: false, error: 'Error al obtener administradores' }, { status: 500 })
+  }
 }
 
-/* ──────────────── POST: crear admin / cambiar contraseña / eliminar ──────────────── */
+/* ──────────────── POST: Operaciones de Administración ──────────────── */
 export async function POST(req: Request) {
   if (!(await isAuthorized())) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
@@ -85,140 +61,220 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { action } = body
 
-    /* ── ACCIÓN: cambiar contraseña del admin maestro (env) ── */
+    /* ── ACCIÓN: Cambiar Contraseña Maestra ── */
     if (action === 'change_master_password') {
       const { currentPassword, newPassword } = body
 
       if (!currentPassword || !newPassword) {
-        return NextResponse.json({ success: false, error: 'Faltan campos requeridos.' }, { status: 400 })
+        return NextResponse.json(
+          { success: false, error: 'Por favor completá la contraseña actual y la nueva.' },
+          { status: 400 }
+        )
       }
 
       if (newPassword.length < 8) {
-        return NextResponse.json({ success: false, error: 'La contraseña nueva debe tener al menos 8 caracteres.' }, { status: 400 })
+        return NextResponse.json(
+          { success: false, error: 'La nueva contraseña debe tener un mínimo de 8 caracteres.' },
+          { status: 400 }
+        )
       }
 
-      const masterPassword = process.env.ADMIN_PASSWORD || 'SealStep2026!'
-      if (currentPassword !== masterPassword) {
-        // Verificar también si hay un hash guardado
-        const admins = await getAdminsFromDB()
-        const masterRecord = admins.find((a) => a.email === '__master_password_hash__')
-        if (masterRecord) {
-          // masterRecord.nombre tiene el hash
-          const valid = await verifyPassword(currentPassword, (masterRecord as any).hash || '')
-          if (!valid) {
-            return NextResponse.json({ success: false, error: 'La contraseña actual es incorrecta.' }, { status: 401 })
-          }
-        } else if (currentPassword !== masterPassword) {
-          return NextResponse.json({ success: false, error: 'La contraseña actual es incorrecta.' }, { status: 401 })
-        }
+      const defaultMasterPassword = process.env.ADMIN_PASSWORD || 'SealStep2026!'
+      const admins = await getStoredAdmins()
+      const masterRecord = admins.find((a) => a.rol === 'master')
+
+      let isCurrentValid = false
+      if (masterRecord) {
+        isCurrentValid = await verifyPassword(currentPassword, masterRecord.passwordHash)
+      } else {
+        isCurrentValid = currentPassword === defaultMasterPassword
       }
 
-      // Guardar el hash de la nueva contraseña
+      if (!isCurrentValid) {
+        return NextResponse.json(
+          { success: false, error: 'La contraseña actual no es correcta.' },
+          { status: 401 }
+        )
+      }
+
+      // Generar nuevo hash y actualizar el registro del master
       const newHash = await hashPassword(newPassword)
-      const admins = await getAdminsFromDB()
-      const withoutMaster = admins.filter((a) => a.email !== '__master_password_hash__')
-      withoutMaster.push({
-        email: '__master_password_hash__',
-        nombre: newHash,
-        creado: new Date().toISOString(),
+      const now = new Date().toISOString()
+      const updatedList: AdminUser[] = [
+        ...admins.filter((a) => a.rol !== 'master'),
+        {
+          id: masterRecord?.id || 'master-admin',
+          email: process.env.ADMIN_EMAIL || 'admin@sealstep.uy',
+          nombre: 'Administrador Maestro',
+          passwordHash: newHash,
+          creado: masterRecord?.creado || now,
+          activo: true,
+          rol: 'master',
+        },
+      ]
+
+      await saveStoredAdmins(updatedList)
+
+      return NextResponse.json({
+        success: true,
+        message: 'Contraseña maestra actualizada correctamente. Ya podés usar tu nueva clave.',
       })
-      await saveAdminsToDB(withoutMaster)
-
-      // Actualizar también en Supabase Auth si está disponible
-      try {
-        const supabaseAdmin = getSupabaseAdmin()
-        const masterEmail = process.env.ADMIN_EMAIL || 'admin@sealstep.uy'
-        const { data: users } = await supabaseAdmin.auth.admin.listUsers()
-        const masterUser = users?.users?.find((u) => u.email === masterEmail)
-        if (masterUser) {
-          await supabaseAdmin.auth.admin.updateUserById(masterUser.id, { password: newPassword })
-        }
-      } catch {
-        // No es crítico si Supabase Auth falla
-      }
-
-      return NextResponse.json({ success: true, message: 'Contraseña del administrador maestro actualizada con éxito.' })
     }
 
-    /* ── ACCIÓN: agregar nuevo administrador ── */
+    /* ── ACCIÓN: Agregar Nuevo Administrador ── */
     if (action === 'add_admin') {
       const { email, nombre, password } = body
 
       if (!email || !nombre || !password) {
-        return NextResponse.json({ success: false, error: 'Email, nombre y contraseña son requeridos.' }, { status: 400 })
-      }
-
-      if (password.length < 8) {
-        return NextResponse.json({ success: false, error: 'La contraseña debe tener al menos 8 caracteres.' }, { status: 400 })
+        return NextResponse.json(
+          { success: false, error: 'Completá todos los campos: nombre, correo y contraseña.' },
+          { status: 400 }
+        )
       }
 
       const cleanEmail = String(email).trim().toLowerCase()
-      const admins = await getAdminsFromDB()
-      const realAdmins = admins.filter((a) => a.email !== '__master_password_hash__')
+      const cleanNombre = String(nombre).trim()
+      const cleanPassword = String(password).trim()
 
-      // Verificar que no exista
-      if (realAdmins.some((a) => a.email === cleanEmail)) {
-        return NextResponse.json({ success: false, error: 'Ya existe un administrador con ese email.' }, { status: 409 })
+      if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+        return NextResponse.json(
+          { success: false, error: 'Ingresá un correo electrónico válido.' },
+          { status: 400 }
+        )
       }
 
-      const passwordHash = await hashPassword(password)
-      const masterEntry = admins.find((a) => a.email === '__master_password_hash__')
+      if (cleanPassword.length < 6) {
+        return NextResponse.json(
+          { success: false, error: 'La contraseña debe tener al menos 6 caracteres.' },
+          { status: 400 }
+        )
+      }
 
-      const newAdmin = {
+      const admins = await getStoredAdmins()
+      const existing = admins.find(
+        (a) => a.email.toLowerCase() === cleanEmail && a.rol !== 'master'
+      )
+
+      if (existing) {
+        return NextResponse.json(
+          { success: false, error: `Ya existe un administrador registrado con el correo ${cleanEmail}.` },
+          { status: 409 }
+        )
+      }
+
+      const passwordHash = await hashPassword(cleanPassword)
+      const newAdmin: AdminUser = {
+        id: `admin-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         email: cleanEmail,
-        nombre: String(nombre).trim(),
+        nombre: cleanNombre,
+        passwordHash,
         creado: new Date().toISOString(),
-        hash: passwordHash,
-      } as any
-
-      const newList = [
-        ...(masterEntry ? [masterEntry] : []),
-        ...realAdmins,
-        newAdmin,
-      ]
-      await saveAdminsToDB(newList)
-
-      // Crear también en Supabase Auth
-      try {
-        const supabaseAdmin = getSupabaseAdmin()
-        await supabaseAdmin.auth.admin.createUser({
-          email: cleanEmail,
-          password,
-          email_confirm: true,
-        })
-      } catch {
-        // No es crítico
+        activo: true,
+        rol: 'admin',
       }
 
-      return NextResponse.json({ success: true, message: `Administrador "${nombre}" agregado con éxito.` })
+      const updatedAdmins = [...admins, newAdmin]
+      const saved = await saveStoredAdmins(updatedAdmins)
+
+      if (!saved) {
+        return NextResponse.json(
+          { success: false, error: 'Hubo un error al guardar en la base de datos.' },
+          { status: 500 }
+        )
+      }
+
+      // Opcional: Registrar también en Supabase Auth si está habilitado
+      if (isSupabaseConfigured()) {
+        try {
+          const supabaseAdmin = getSupabaseAdmin()
+          await supabaseAdmin.auth.admin.createUser({
+            email: cleanEmail,
+            password: cleanPassword,
+            email_confirm: true,
+          })
+        } catch {
+          // No bloqueante
+        }
+      }
+
+      // ENVIAR CORREO ELECTRÓNICO CON SUS CREDENCIALES
+      let emailSent = false
+      try {
+        const mailRes = await sendAdminInvitationEmail({
+          nombre: cleanNombre,
+          email: cleanEmail,
+          password: cleanPassword,
+        })
+        emailSent = mailRes.success
+      } catch (err) {
+        console.warn('Aviso al enviar correo de invitación a admin:', err)
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: emailSent
+          ? `¡Administrador "${cleanNombre}" agregado con éxito! Se envió un correo con sus credenciales de acceso a ${cleanEmail}.`
+          : `¡Administrador "${cleanNombre}" agregado y habilitado con éxito para ${cleanEmail}!`,
+        admin: {
+          id: newAdmin.id,
+          email: newAdmin.email,
+          nombre: newAdmin.nombre,
+          creado: newAdmin.creado,
+          activo: newAdmin.activo,
+          rol: newAdmin.rol,
+        },
+      })
     }
 
-    /* ── ACCIÓN: eliminar administrador ── */
-    if (action === 'delete_admin') {
-      const { email } = body
+    /* ── ACCIÓN: Revocar o Eliminar Administrador ── */
+    if (action === 'revoke_admin' || action === 'delete_admin') {
+      const { email, id } = body
 
-      if (!email) {
-        return NextResponse.json({ success: false, error: 'Email requerido.' }, { status: 400 })
+      if (!email && !id) {
+        return NextResponse.json({ success: false, error: 'Identificador o correo requerido.' }, { status: 400 })
       }
 
-      const cleanEmail = String(email).trim().toLowerCase()
-      const admins = await getAdminsFromDB()
-      const newList = admins.filter((a) => a.email !== cleanEmail)
-      await saveAdminsToDB(newList)
+      const admins = await getStoredAdmins()
+      const target = admins.find(
+        (a) => (id && a.id === id) || (email && a.email.toLowerCase() === String(email).trim().toLowerCase())
+      )
 
-      // Eliminar de Supabase Auth también
-      try {
-        const supabaseAdmin = getSupabaseAdmin()
-        const { data: users } = await supabaseAdmin.auth.admin.listUsers()
-        const user = users?.users?.find((u) => u.email === cleanEmail)
-        if (user) {
-          await supabaseAdmin.auth.admin.deleteUser(user.id)
+      if (!target) {
+        return NextResponse.json(
+          { success: false, error: 'No se encontró el administrador especificado.' },
+          { status: 404 }
+        )
+      }
+
+      if (target.rol === 'master') {
+        return NextResponse.json(
+          { success: false, error: 'No es posible revocar al Administrador Maestro principal.' },
+          { status: 403 }
+        )
+      }
+
+      // Eliminar de la lista de administradores activos
+      const updatedAdmins = admins.filter((a) => a.id !== target.id)
+      await saveStoredAdmins(updatedAdmins)
+
+      // Eliminar de Supabase Auth si existe
+      if (isSupabaseConfigured()) {
+        try {
+          const supabaseAdmin = getSupabaseAdmin()
+          const { data: users } = await supabaseAdmin.auth.admin.listUsers()
+          const user = users?.users?.find((u) => u.email?.toLowerCase() === target.email.toLowerCase())
+          if (user) {
+            await supabaseAdmin.auth.admin.deleteUser(user.id)
+          }
+        } catch {
+          // No bloqueante
         }
-      } catch {
-        // No es crítico
       }
 
-      return NextResponse.json({ success: true, message: 'Administrador eliminado correctamente.' })
+      return NextResponse.json({
+        success: true,
+        message: `Acceso revocado exitosamente para ${target.nombre} (${target.email}). Esta cuenta ya no puede acceder al panel.`,
+      })
     }
 
     return NextResponse.json({ success: false, error: 'Acción no reconocida.' }, { status: 400 })
