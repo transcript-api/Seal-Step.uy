@@ -72,7 +72,7 @@ export function Hero({
               />
             </div>
             <p className="mt-5 max-w-xl font-heading text-base sm:text-xl lg:text-2xl leading-snug font-semibold text-pretty">
-              Championes urbanos e importados seleccionados para quienes buscan estilo y comodidad.
+              Importados Seal Step, seleccionados para quienes buscan calidad y comodidad.
             </p>
           </Reveal>
 
