@@ -5,9 +5,38 @@ import {
   DEFAULT_ADMIN_EMAIL,
   DEFAULT_ADMIN_PASSWORD,
 } from '@/lib/auth'
-import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { supabase, isSupabaseConfigured, getSupabaseAdmin } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
+
+// Hashear contraseña (debe coincidir con el método en /api/admin/admins)
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(password + (process.env.ADMIN_SESSION_SECRET || 'seal-step-secret-session-token-key-2026'))
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+// Verificar contra admins adicionales guardados en Supabase
+async function checkExtraAdmins(email: string, password: string): Promise<boolean> {
+  try {
+    const supabaseAdmin = getSupabaseAdmin()
+    const { data } = await supabaseAdmin
+      .from('clientes')
+      .select('email')
+      .eq('origen', 'system_admins')
+      .single()
+    if (!data?.email) return false
+    const admins = JSON.parse(data.email) as Array<{ email: string; nombre: string; hash?: string }>
+    const match = admins.find((a) => a.email === email && a.email !== '__master_password_hash__')
+    if (!match || !match.hash) return false
+    const hash = await hashPassword(password)
+    return hash === match.hash
+  } catch {
+    return false
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -33,7 +62,12 @@ export async function POST(req: Request) {
       isAuthenticated = true
     }
 
-    // 2. Si no coincide con las maestras y Supabase está configurado, intentar Supabase Auth
+    // 2. Verificar contra administradores adicionales en base de datos
+    if (!isAuthenticated) {
+      isAuthenticated = await checkExtraAdmins(cleanEmail, cleanPassword)
+    }
+
+    // 3. Si no coincide con ninguno local y Supabase está configurado, intentar Supabase Auth
     if (!isAuthenticated && isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({

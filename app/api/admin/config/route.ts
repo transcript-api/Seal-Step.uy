@@ -24,6 +24,9 @@ export async function POST(req: Request) {
       )
     }
 
+    // Merge body with defaults to get the full updated config
+    const mergedConfig = { ...DEFAULT_SITE_CONFIG, ...body }
+
     // 1. Guardar siempre en archivo local data/site-config.json
     try {
       const fs = await import('fs')
@@ -50,7 +53,7 @@ export async function POST(req: Request) {
             email: 'system_config@sealstep.internal',
             nombre: 'Configuración General Tienda',
             origen: 'system_config',
-            notas: JSON.stringify(updatedLocal),
+            notas: JSON.stringify(mergedConfig),
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'id' }

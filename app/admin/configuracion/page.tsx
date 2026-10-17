@@ -17,10 +17,18 @@ import {
   Layers,
   Plus,
   Trash2,
+  ShieldCheck,
+  KeyRound,
+  UserPlus,
+  Eye,
+  EyeOff,
+  UserX,
 } from 'lucide-react'
 import { DEFAULT_SITE_CONFIG, type SiteConfig } from '@/lib/site-config'
 
-type TabType = 'contacto' | 'metricas' | 'envios' | 'anuncios' | 'mercadopago' | 'mayorista'
+type TabType = 'contacto' | 'metricas' | 'envios' | 'anuncios' | 'mercadopago' | 'mayorista' | 'seguridad'
+
+type AdminUser = { email: string; nombre: string; creado: string }
 
 export interface ReglaMayoristaUI {
   id?: string
@@ -38,6 +46,23 @@ export default function AdminConfiguracionPage() {
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [reglasMayorista, setReglasMayorista] = useState<ReglaMayoristaUI[]>([])
   const [savingMayorista, setSavingMayorista] = useState(false)
+
+  // Estado para Seguridad & Admins
+  const [admins, setAdmins] = useState<AdminUser[]>([])
+  const [loadingAdmins, setLoadingAdmins] = useState(false)
+  const [savingAdmin, setSavingAdmin] = useState(false)
+  const [adminMsg, setAdminMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  // Cambio de contraseña maestra
+  const [curPass, setCurPass] = useState('')
+  const [newPass, setNewPass] = useState('')
+  const [confPass, setConfPass] = useState('')
+  const [showCurPass, setShowCurPass] = useState(false)
+  const [showNewPass, setShowNewPass] = useState(false)
+  // Nuevo admin
+  const [newAdminEmail, setNewAdminEmail] = useState('')
+  const [newAdminNombre, setNewAdminNombre] = useState('')
+  const [newAdminPass, setNewAdminPass] = useState('')
+  const [showNewAdminPass, setShowNewAdminPass] = useState(false)
 
   useEffect(() => {
     async function loadConfig() {
@@ -69,6 +94,108 @@ export default function AdminConfiguracionPage() {
     loadConfig()
     loadReglas()
   }, [])
+
+  const loadAdmins = async () => {
+    setLoadingAdmins(true)
+    try {
+      const res = await fetch('/api/admin/admins')
+      const data = await res.json()
+      if (data.success && data.admins) {
+        setAdmins(data.admins.filter((a: AdminUser) => a.email !== '__master_password_hash__'))
+      }
+    } catch {}
+    finally { setLoadingAdmins(false) }
+  }
+
+  const handleChangeMasterPassword = async () => {
+    if (!curPass || !newPass || !confPass) {
+      setAdminMsg({ type: 'error', text: 'Completá todos los campos de contraseña.' })
+      return
+    }
+    if (newPass !== confPass) {
+      setAdminMsg({ type: 'error', text: 'La contraseña nueva y su confirmación no coinciden.' })
+      return
+    }
+    if (newPass.length < 8) {
+      setAdminMsg({ type: 'error', text: 'La nueva contraseña debe tener al menos 8 caracteres.' })
+      return
+    }
+    setSavingAdmin(true)
+    setAdminMsg(null)
+    try {
+      const res = await fetch('/api/admin/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'change_master_password', currentPassword: curPass, newPassword: newPass }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setAdminMsg({ type: 'success', text: data.message })
+        setCurPass(''); setNewPass(''); setConfPass('')
+      } else {
+        setAdminMsg({ type: 'error', text: data.error || 'Error al cambiar la contraseña.' })
+      }
+    } catch {
+      setAdminMsg({ type: 'error', text: 'Error de red.' })
+    } finally {
+      setSavingAdmin(false)
+      setTimeout(() => setAdminMsg(null), 6000)
+    }
+  }
+
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail || !newAdminNombre || !newAdminPass) {
+      setAdminMsg({ type: 'error', text: 'Completá todos los campos del nuevo administrador.' })
+      return
+    }
+    setSavingAdmin(true)
+    setAdminMsg(null)
+    try {
+      const res = await fetch('/api/admin/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add_admin', email: newAdminEmail, nombre: newAdminNombre, password: newAdminPass }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setAdminMsg({ type: 'success', text: data.message })
+        setNewAdminEmail(''); setNewAdminNombre(''); setNewAdminPass('')
+        await loadAdmins()
+      } else {
+        setAdminMsg({ type: 'error', text: data.error || 'Error al agregar administrador.' })
+      }
+    } catch {
+      setAdminMsg({ type: 'error', text: 'Error de red.' })
+    } finally {
+      setSavingAdmin(false)
+      setTimeout(() => setAdminMsg(null), 6000)
+    }
+  }
+
+  const handleDeleteAdmin = async (email: string, nombre: string) => {
+    if (!confirm(`¿Eliminar al administrador "${nombre}" (${email})? Esta acción no se puede deshacer.`)) return
+    setSavingAdmin(true)
+    setAdminMsg(null)
+    try {
+      const res = await fetch('/api/admin/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_admin', email }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setAdminMsg({ type: 'success', text: data.message })
+        await loadAdmins()
+      } else {
+        setAdminMsg({ type: 'error', text: data.error || 'Error al eliminar.' })
+      }
+    } catch {
+      setAdminMsg({ type: 'error', text: 'Error de red.' })
+    } finally {
+      setSavingAdmin(false)
+      setTimeout(() => setAdminMsg(null), 6000)
+    }
+  }
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -274,6 +401,19 @@ export default function AdminConfiguracionPage() {
         >
           <Percent className="size-4" />
           <span>Precios Mayoristas</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => { setActiveTab('seguridad'); loadAdmins() }}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition ${
+            activeTab === 'seguridad'
+              ? 'bg-red-500/10 border border-red-500/30 text-red-400'
+              : 'bg-neutral-900/60 border border-transparent text-neutral-400 hover:text-white'
+          }`}
+        >
+          <ShieldCheck className="size-4" />
+          <span>Seguridad &amp; Admins</span>
         </button>
       </div>
 
@@ -807,6 +947,204 @@ export default function AdminConfiguracionPage() {
                 Si el carrito suma 8 pares o más, el sistema aplica automáticamente el 25% OFF sobre el total acumulado. Si suma 15 o más pares, aplica el 30% OFF. Si tiene un cupón con mayor descuento, siempre se le garantiza el mejor beneficio al cliente.
               </p>
             </div>
+          </div>
+        )}
+
+        {/* PESTAÑA: Seguridad & Admins */}
+        {activeTab === 'seguridad' && (
+          <div className="space-y-8">
+
+            {/* Mensaje de estado */}
+            {adminMsg && (
+              <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-3 animate-in fade-in duration-200 ${
+                adminMsg.type === 'success'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+              }`}>
+                {adminMsg.type === 'success' ? <CheckCircle2 className="size-4 shrink-0" /> : <AlertCircle className="size-4 shrink-0" />}
+                <span>{adminMsg.text}</span>
+              </div>
+            )}
+
+            {/* ── Cambiar contraseña del admin maestro ── */}
+            <div className="rounded-2xl border border-neutral-800 bg-[#0d0d0d] p-6 space-y-5">
+              <h2 className="text-base font-heading font-black uppercase text-white tracking-wide flex items-center gap-2">
+                <KeyRound className="size-4 text-yellow-400" />
+                <span>Cambiar Contraseña Maestra</span>
+              </h2>
+              <p className="text-xs text-neutral-400">
+                Esta es la contraseña del administrador principal ({process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@sealstep.uy'}). Cambiala regularmente por seguridad.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Contraseña actual */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Contraseña Actual</label>
+                  <div className="relative">
+                    <input
+                      type={showCurPass ? 'text' : 'password'}
+                      value={curPass}
+                      onChange={(e) => setCurPass(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 pr-10 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-yellow-500 transition"
+                    />
+                    <button type="button" onClick={() => setShowCurPass(!showCurPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition">
+                      {showCurPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                </div>
+                {/* Nueva contraseña */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Nueva Contraseña</label>
+                  <div className="relative">
+                    <input
+                      type={showNewPass ? 'text' : 'password'}
+                      value={newPass}
+                      onChange={(e) => setNewPass(e.target.value)}
+                      placeholder="Mín. 8 caracteres"
+                      className="w-full px-4 py-3 pr-10 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-yellow-500 transition"
+                    />
+                    <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition">
+                      {showNewPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                </div>
+                {/* Confirmar contraseña */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Confirmar Nueva</label>
+                  <input
+                    type="password"
+                    value={confPass}
+                    onChange={(e) => setConfPass(e.target.value)}
+                    placeholder="Repetí la contraseña"
+                    className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-yellow-500 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleChangeMasterPassword}
+                  disabled={savingAdmin}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-black uppercase tracking-wider transition shadow-lg shadow-yellow-500/20 disabled:opacity-50"
+                >
+                  {savingAdmin ? <span className="size-4 rounded-full border-2 border-black border-t-transparent animate-spin" /> : <KeyRound className="size-4" />}
+                  <span>Actualizar Contraseña</span>
+                </button>
+              </div>
+
+              <div className="p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20 text-xs text-yellow-400/80">
+                ⚠️ <strong>Importante:</strong> Luego de cambiar la contraseña, cerrá sesión y volvé a ingresar con la nueva contraseña para confirmar que funciona correctamente.
+              </div>
+            </div>
+
+            {/* ── Gestión de administradores extra ── */}
+            <div className="rounded-2xl border border-neutral-800 bg-[#0d0d0d] p-6 space-y-5">
+              <h2 className="text-base font-heading font-black uppercase text-white tracking-wide flex items-center gap-2">
+                <UserPlus className="size-4 text-emerald-400" />
+                <span>Administradores Adicionales</span>
+              </h2>
+              <p className="text-xs text-neutral-400">
+                Podés agregar más personas que puedan acceder al panel de administración con su propio email y contraseña.
+              </p>
+
+              {/* Formulario para agregar nuevo admin */}
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 space-y-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">+ Nuevo Administrador</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Nombre</label>
+                    <input
+                      type="text"
+                      value={newAdminNombre}
+                      onChange={(e) => setNewAdminNombre(e.target.value)}
+                      placeholder="Ej: María García"
+                      className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Email</label>
+                    <input
+                      type="email"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      placeholder="maria@sealstep.uy"
+                      className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Contraseña</label>
+                    <div className="relative">
+                      <input
+                        type={showNewAdminPass ? 'text' : 'password'}
+                        value={newAdminPass}
+                        onChange={(e) => setNewAdminPass(e.target.value)}
+                        placeholder="Mín. 8 caracteres"
+                        className="w-full px-4 py-3 pr-10 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                      />
+                      <button type="button" onClick={() => setShowNewAdminPass(!showNewAdminPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition">
+                        {showNewAdminPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleAddAdmin}
+                    disabled={savingAdmin}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                  >
+                    {savingAdmin ? <span className="size-4 rounded-full border-2 border-black border-t-transparent animate-spin" /> : <UserPlus className="size-4" />}
+                    <span>Agregar Administrador</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Lista de admins existentes */}
+              {loadingAdmins ? (
+                <div className="flex items-center gap-2 text-neutral-500 text-xs py-4">
+                  <span className="size-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+                  Cargando administradores...
+                </div>
+              ) : admins.length === 0 ? (
+                <div className="text-center py-8 text-neutral-500 text-sm">
+                  <ShieldCheck className="size-10 mx-auto mb-3 text-neutral-700" />
+                  <p>No hay administradores adicionales configurados.</p>
+                  <p className="text-xs mt-1 text-neutral-600">Solo existe el administrador maestro.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 px-1">Administradores activos</p>
+                  {admins.map((admin) => (
+                    <div key={admin.email} className="flex items-center justify-between p-4 rounded-xl border border-neutral-800 bg-neutral-900/60 group hover:border-neutral-700 transition">
+                      <div className="flex items-center gap-3">
+                        <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                          <ShieldCheck className="size-4 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">{admin.nombre}</p>
+                          <p className="text-xs text-neutral-400">{admin.email}</p>
+                          <p className="text-[10px] text-neutral-600 mt-0.5">Creado: {new Date(admin.creado).toLocaleDateString('es-UY')}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAdmin(admin.email, admin.nombre)}
+                        disabled={savingAdmin}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white text-xs font-bold transition opacity-0 group-hover:opacity-100 disabled:opacity-30"
+                        title="Eliminar administrador"
+                      >
+                        <UserX className="size-3.5" />
+                        <span>Eliminar</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
       </form>
